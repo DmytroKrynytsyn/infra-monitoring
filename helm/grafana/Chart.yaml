@@ -1,0 +1,6 @@
+apiVersion: v2
+name: infra-monitoring-grafana
+description: Grafana dashboard for metrics and logs
+type: application
+version: 0.1.0
+appVersion: "11.2.0"

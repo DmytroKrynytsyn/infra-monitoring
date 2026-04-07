@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra-monitoring-otelcol
+  namespace: argocd
+  labels:
+    project: infra-monitoring
+    component: otelcol
+spec:
+  project: infra-monitoring
+  source:
+    repoURL: https://github.com/DmytroKrynytsyn/infra-monitoring.git
+    targetRevision: HEAD
+    path: helm/otelcol
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

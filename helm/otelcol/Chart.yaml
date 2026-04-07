@@ -1,0 +1,6 @@
+apiVersion: v2
+name: infra-monitoring-otelcol
+description: OpenTelemetry Collector DaemonSet for host and k8s workload observability
+type: application
+version: 0.1.0
+appVersion: "0.104.0"

@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infra-monitoring-otelcol
+  namespace: monitoring
+data:
+  config.yaml: |
+    receivers:
+      hostmetrics:
+        collection_interval: 30s
+        root_path: /hostfs
+        scrapers:
+          cpu: {}
+          memory: {}
+          disk: {}
+          filesystem:
+            exclude_mount_points:
+              mount_points:
+                - /dev
+                - /sys
+                - /proc
+                - /run/k3s
+                - /var/lib/kubelet
+              match_type: strict
+          network: {}
+          processes: {}
+
+      journald:
+        directory: /run/log/journal
+        priority: info
+
+      filelog:
+        include:
+          - /var/log/*.log
+          - /var/log/syslog
+        start_at: end
+        include_file_path: true
+        include_file_name: false
+
+      kubeletstats:
+        collection_interval: 30s
+        auth_type: serviceAccount
+        endpoint: "https://${env:NODE_IP}:10250"
+        insecure_skip_verify: true
+        metric_groups:
+          - node
+          - pod
+          - container
+
+      k8s_events:
+        namespaces: []
+
+    processors:
+      batch:
+        timeout: 10s
+
+      resourcedetection:
+        detectors: [env, system, k8snode]
+        system:
+          hostname_sources: [os]
+
+      k8sattributes:
+        auth_type: serviceAccount
+        passthrough: false
+        extract:
+          metadata:
+            - k8s.pod.name
+            - k8s.namespace.name
+            - k8s.deployment.name
+            - k8s.node.name
+            - k8s.container.name
+
+    exporters:
+      prometheusremotewrite:
+        endpoint: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428/api/v1/write
+        tls:
+          insecure: true
+
+      otlphttp/victorialogs:
+        endpoint: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428/insert/opentelemetry
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [hostmetrics, kubeletstats]
+          processors: [resourcedetection, k8sattributes, batch]
+          exporters: [prometheusremotewrite]
+        logs:
+          receivers: [journald, filelog, k8s_events]
+          processors: [resourcedetection, k8sattributes, batch]
+          exporters: [otlphttp/victorialogs]

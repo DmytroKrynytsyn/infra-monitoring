@@ -1,0 +1,27 @@
+image:
+  repository: victoriametrics/victoria-metrics
+  tag: "v1.135.0"
+  pullPolicy: IfNotPresent
+
+nodeSelector:
+  kubernetes.io/hostname: kserver
+
+retentionPeriod: "1"
+
+port: 8428
+
+storage:
+  size: 10Gi
+  storageClass: local-path
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+service:
+  type: ClusterIP
+  port: 8428

@@ -1,0 +1,34 @@
+image:
+  repository: grafana/grafana
+  tag: "11.2.0"
+  pullPolicy: IfNotPresent
+
+port: 3000
+
+ingress:
+  host: grafana.local
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+storage:
+  size: 2Gi
+  storageClass: local-path
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+service:
+  type: ClusterIP
+  port: 80
+
+datasources:
+  victoriametrics:
+    url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
+  victorialogs:
+    url: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428
