@@ -4,7 +4,7 @@ image:
   pullPolicy: IfNotPresent
 
 nodeSelector:
-  kubernetes.io/hostname: kserver
+  node-role.kubernetes.io/control-plane: true
 
 retentionPeriod: "30d"
 
