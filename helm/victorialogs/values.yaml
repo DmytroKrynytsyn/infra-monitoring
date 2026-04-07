@@ -4,7 +4,7 @@ image:
   pullPolicy: IfNotPresent
 
 nodeSelector:
-  node-role.kubernetes.io/control-plane: true
+  kubernetes.io/role: master
 
 retentionPeriod: "30d"
 

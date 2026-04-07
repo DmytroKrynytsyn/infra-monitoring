@@ -17,6 +17,8 @@ spec:
     spec:
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations:
+        - operator: Exists
       containers:
         - name: victoriametrics
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
