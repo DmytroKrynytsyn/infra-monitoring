@@ -25,10 +25,6 @@ data:
           network: {}
           processes: {}
 
-      journald:
-        directory: /run/log/journal
-        priority: info
-
       filelog:
         include:
           - /var/log/*.log
@@ -88,6 +84,6 @@ data:
           processors: [resourcedetection, k8sattributes, batch]
           exporters: [prometheusremotewrite]
         logs:
-          receivers: [journald, filelog, k8s_events]
+          receivers: [filelog, k8s_events]
           processors: [resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
