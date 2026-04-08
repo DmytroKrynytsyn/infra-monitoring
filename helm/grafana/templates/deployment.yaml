@@ -40,6 +40,9 @@ spec:
             - name: config
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
+            - name: dashboard
+              mountPath: /etc/grafana/provisioning/dashboards/cluster-nodes.json
+              subPath: dashboard.json
           readinessProbe:
             httpGet:
               path: /api/health
@@ -59,3 +62,6 @@ spec:
         - name: config
           configMap:
             name: infra-monitoring-grafana-config
+        - name: dashboard
+          configMap:
+            name: infra-monitoring-grafana-dashboard
