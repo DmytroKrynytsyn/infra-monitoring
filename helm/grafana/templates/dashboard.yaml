@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infra-monitoring-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Cluster Nodes Metrics",
+        "tags": ["kubernetes", "nodes"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "title": "CPU Usage %",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yaxes": [
+              {
+                "unit": "percent",
+                "min": 0,
+                "max": 100
+              }
+            ]
+          },
+          {
+            "title": "Memory Usage %",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100)",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yaxes": [
+              {
+                "unit": "percent",
+                "min": 0,
+                "max": 100
+              }
+            ]
+          },
+          {
+            "title": "Disk Usage %",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - (node_filesystem_avail_bytes / node_filesystem_size_bytes * 100)",
+                "legendFormat": "{{instance}} {{mountpoint}}"
+              }
+            ],
+            "yaxes": [
+              {
+                "unit": "percent",
+                "min": 0,
+                "max": 100
+              }
+            ]
+          },
+          {
+            "title": "Network Usage (bytes/sec)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(node_network_receive_bytes_total[5m]) + rate(node_network_transmit_bytes_total[5m])",
+                "legendFormat": "{{instance}} {{device}}"
+              }
+            ],
+            "yaxes": [
+              {
+                "unit": "bytes/sec"
+              }
+            ]
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "5s"
+      }
+    }
