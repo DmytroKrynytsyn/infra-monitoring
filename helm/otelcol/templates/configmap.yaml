@@ -48,6 +48,8 @@ data:
     exporters:
       prometheusremotewrite:
         endpoint: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428/api/v1/write
+        resource_to_telemetry_conversion:
+          enabled: true
         tls:
           insecure: true
 
