@@ -6,6 +6,8 @@ metadata:
   labels:
     project: infra-monitoring
     component: victorialogs
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
