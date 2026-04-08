@@ -19,7 +19,7 @@ data:
             "targets": [
               {
                 "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
-                "legendFormat": "{{instance}}"
+                "legendFormat": "{{ "{{instance}}" }}"
               }
             ],
             "yaxes": [
@@ -36,7 +36,7 @@ data:
             "targets": [
               {
                 "expr": "100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100)",
-                "legendFormat": "{{instance}}"
+                "legendFormat": "{{ "{{instance}}" }}"
               }
             ],
             "yaxes": [
@@ -53,7 +53,7 @@ data:
             "targets": [
               {
                 "expr": "100 - (node_filesystem_avail_bytes / node_filesystem_size_bytes * 100)",
-                "legendFormat": "{{instance}} {{mountpoint}}"
+                "legendFormat": "{{ "{{instance}}" }} {{ "{{mountpoint}}" }}"
               }
             ],
             "yaxes": [
@@ -70,7 +70,7 @@ data:
             "targets": [
               {
                 "expr": "rate(node_network_receive_bytes_total[5m]) + rate(node_network_transmit_bytes_total[5m])",
-                "legendFormat": "{{instance}} {{device}}"
+                "legendFormat": "{{ "{{instance}}" }} {{ "{{device}}" }}"
               }
             ],
             "yaxes": [
