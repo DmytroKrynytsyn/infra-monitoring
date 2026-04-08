@@ -66,5 +66,5 @@ data:
       pipelines:
         metrics:
           receivers: [hostmetrics]
-          processors: [resourcedetection, attributes, k8sattributes, batch]
+          processors: [resourcedetection, k8sattributes, attributes, batch]
           exporters: [prometheusremotewrite]
