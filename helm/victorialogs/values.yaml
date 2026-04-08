@@ -12,7 +12,7 @@ port: 9428
 
 storage:
   size: 10Gi
-  storageClass: local-path
+  storageClass: ""
 
 resources:
   requests:
