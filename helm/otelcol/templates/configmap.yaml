@@ -44,6 +44,15 @@ data:
             - k8s.deployment.name
             - k8s.node.name
             - k8s.container.name
+    
+      attributes:
+        actions:
+          - key: node
+            from_attribute: k8s.node.name
+            action: insert
+          - key: ip
+            from_attribute: node.ip
+            action: insert
 
     exporters:
       prometheusremotewrite:
@@ -57,5 +66,5 @@ data:
       pipelines:
         metrics:
           receivers: [hostmetrics]
-          processors: [resourcedetection, batch, k8sattributes]
+          processors: [resourcedetection, batch, attributes, k8sattributes]
           exporters: [prometheusremotewrite]
