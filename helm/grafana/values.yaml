@@ -26,23 +26,3 @@ resources:
 service:
   type: ClusterIP
   port: 80
-
-datasources:
-  victoriametrics:
-    url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
-  victorialogs:
-    url: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428
-
-dashboardProviders:
-  dashboardproviders.yaml:
-    apiVersion: 1
-    providers:
-    - name: 'default'
-      orgId: 1
-      folder: 'Homelab'
-      type: file
-      disableDeletion: false
-      editable: true
-      updateIntervalSeconds: 30
-      options:
-        path: /etc/grafana/provisioning/dashboards

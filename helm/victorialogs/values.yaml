@@ -6,13 +6,13 @@ image:
 nodeSelector:
   node-role.kubernetes.io/control-plane: "true"
 
-retentionPeriod: "30d"
+retentionPeriod: "1"
 
 port: 9428
 
 storage:
   size: 10Gi
-  storageClass: ""
+  storageClass: "local-path"
 
 resources:
   requests:

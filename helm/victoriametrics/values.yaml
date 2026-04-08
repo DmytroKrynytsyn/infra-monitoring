@@ -12,7 +12,7 @@ port: 8428
 
 storage:
   size: 10Gi
-  storageClass: ""
+  storageClass: "local-path"
 
 resources:
   requests:

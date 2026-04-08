@@ -125,7 +125,7 @@ data:
               "editorMode": "code",
               "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
               "instant": false,
-              "legendFormat": "{{ "{{instance}}" }}",
+              "legendFormat": "{{instance}}",
               "range": true,
               "refId": "A"
             }
@@ -228,7 +228,7 @@ data:
               "editorMode": "code",
               "expr": "100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100)",
               "instant": false,
-              "legendFormat": "{{ "{{instance}}" }}",
+              "legendFormat": "{{instance}}",
               "range": true,
               "refId": "A"
             }
@@ -331,7 +331,7 @@ data:
               "editorMode": "code",
               "expr": "100 - (node_filesystem_avail_bytes / node_filesystem_size_bytes * 100)",
               "instant": false,
-              "legendFormat": "{{ "{{instance}}" }} {{ "{{mountpoint}}" }}",
+              "legendFormat": "{{instance}} {{mountpoint}}",
               "range": true,
               "refId": "A"
             }
@@ -424,7 +424,7 @@ data:
               "editorMode": "code",
               "expr": "rate(node_network_receive_bytes_total[5m]) + rate(node_network_transmit_bytes_total[5m])",
               "instant": false,
-              "legendFormat": "{{ "{{instance}}" }} {{ "{{device}}" }}",
+              "legendFormat": "{{instance}} {{device}}",
               "range": true,
               "refId": "A"
             }
