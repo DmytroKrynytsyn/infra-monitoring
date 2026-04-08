@@ -6,7 +6,7 @@ image:
 nodeSelector:
   node-role.kubernetes.io/control-plane: "true"
 
-retentionPeriod: "1"
+retentionPeriod: "30d"
 
 port: 9428
 
