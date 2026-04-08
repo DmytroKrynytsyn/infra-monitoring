@@ -25,27 +25,6 @@ data:
           network: {}
           processes: {}
 
-      filelog:
-        include:
-          - /var/log/*.log
-          - /var/log/syslog
-        start_at: end
-        include_file_path: true
-        include_file_name: false
-
-      kubeletstats:
-        collection_interval: 30s
-        auth_type: serviceAccount
-        endpoint: "https://${env:NODE_IP}:10250"
-        insecure_skip_verify: true
-        metric_groups:
-          - node
-          - pod
-          - container
-
-      k8s_events:
-        namespaces: []
-
     processors:
       batch:
         timeout: 10s
@@ -75,6 +54,6 @@ data:
     service:
       pipelines:
         metrics:
-          receivers: [hostmetrics, kubeletstats]
-          processors: [resourcedetection, k8sattributes, batch]
+          receivers: [hostmetrics]
+          processors: [resourcedetection, batch]
           exporters: [prometheusremotewrite]
