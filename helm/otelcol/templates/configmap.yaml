@@ -30,7 +30,7 @@ data:
         timeout: 10s
 
       resourcedetection:
-        detectors: [env, system, k8snode]
+        detectors: [env, system]
         system:
           hostname_sources: [os]
 
