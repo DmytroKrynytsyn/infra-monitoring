@@ -39,8 +39,10 @@ dashboardProviders:
     providers:
     - name: 'default'
       orgId: 1
-      folder: '/etc/grafana/provisioning/dashboards'
+      folder: 'Homelab'
       type: file
       disableDeletion: false
-      updateIntervalSeconds: 10
-      allowUiUpdates: true
+      editable: true
+      updateIntervalSeconds: 30
+      options:
+        path: /etc/grafana/provisioning/dashboards
