@@ -32,3 +32,15 @@ datasources:
     url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
   victorialogs:
     url: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
