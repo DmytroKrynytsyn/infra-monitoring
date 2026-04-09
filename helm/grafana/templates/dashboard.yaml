@@ -19,7 +19,7 @@ data:
           "targets": [
             {
               "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
-              "legendFormat": "{{instance}}"
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
             }
           ]
         },
@@ -32,7 +32,7 @@ data:
           "targets": [
             {
               "expr": "100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100)",
-              "legendFormat": "{{instance}}"
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
             }
           ]
         },
@@ -45,19 +45,16 @@ data:
           "targets": [
             {
               "expr": "100 - (node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'} * 100)",
-              "legendFormat": "{{instance}}"
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
             }
           ]
         },
         {
           "id": 4,
-          "title": "System Logs (VictoriaLogs)",
+          "title": "All System Logs",
           "type": "logs",
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
-          "datasource": {
-            "type": "victoriametrics-logs-datasource",
-            "uid": "VictoriaLogs"
-          },
+          "datasource": { "type": "victoriametrics-logs-datasource" },
           "targets": [
             {
               "expr": "*",
