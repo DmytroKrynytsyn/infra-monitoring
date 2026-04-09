@@ -24,6 +24,17 @@ data:
               match_type: strict
           network: {}
           processes: {}
+      
+      # Layer 1: OS/Node Logs
+      journald:
+        directory: /var/log/journal
+      
+      filelog/system:
+        include:
+          - /var/log/syslog
+          - /var/log/auth.log
+          - /var/log/kern.log
+        start_at: end
 
     processors:
       batch:
@@ -61,6 +72,12 @@ data:
           enabled: true
         tls:
           insecure: true
+      
+      # VictoriaLogs OTLP endpoint (usually port 9428 or 8428 depending on setup)
+      otlphttp/victorialogs:
+        endpoint: http://cluster.local
+        tls:
+          insecure: true
 
     service:
       pipelines:
@@ -68,3 +85,9 @@ data:
           receivers: [hostmetrics]
           processors: [resourcedetection, k8sattributes, attributes, batch]
           exporters: [prometheusremotewrite]
+        
+        # New pipeline for Node/OS logs
+        logs/system:
+          receivers: [journald, filelog/system]
+          processors: [resourcedetection, k8sattributes, batch]
+          exporters: [otlphttp/victorialogs]

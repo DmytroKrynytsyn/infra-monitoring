@@ -62,7 +62,12 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: journal
+            # Mount for persistent journal logs
+            - name: journal-var
+              mountPath: /var/log/journal
+              readOnly: true
+            # Mount for volatile journal logs
+            - name: journal-run
               mountPath: /run/log/journal
               readOnly: true
             - name: etcmachineid
@@ -84,7 +89,10 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        - name: journal
+        - name: journal-var
+          hostPath:
+            path: /var/log/journal
+        - name: journal-run
           hostPath:
             path: /run/log/journal
         - name: etcmachineid
