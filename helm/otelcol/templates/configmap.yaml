@@ -24,15 +24,10 @@ data:
               match_type: strict
           network: {}
           processes: {}
-      
-      # Using filelog for everything to avoid the journalctl binary error
-      filelog/system:
-        include:
-          - /var/log/syslog
-          - /var/log/auth.log
-          - /var/log/kern.log
-          - /var/log/messages
-        start_at: end
+
+      journald:
+        directory: /var/log/journal
+        priority: info
 
     processors:
       batch:
@@ -53,7 +48,7 @@ data:
             - k8s.deployment.name
             - k8s.node.name
             - k8s.container.name
-    
+
       attributes:
         actions:
           - key: node
@@ -70,9 +65,8 @@ data:
           enabled: true
         tls:
           insecure: true
-      
+
       otlphttp/victorialogs:
-        # Correct path for VictoriaMetrics OTLP log ingestion
         endpoint: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428/insert/opentelemetry
         tls:
           insecure: true
@@ -83,9 +77,8 @@ data:
           receivers: [hostmetrics]
           processors: [resourcedetection, k8sattributes, attributes, batch]
           exporters: [prometheusremotewrite]
-        
+
         logs/system:
-          # Switched to filelog only to ensure the collector starts
-          receivers: [filelog/system]
+          receivers: [journald]
           processors: [resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
