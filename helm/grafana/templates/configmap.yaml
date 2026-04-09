@@ -27,6 +27,7 @@ data:
 
       - name: VictoriaLogs
         type: victoriametrics-logs-datasource
+        uid: VictoriaLogs
         access: proxy
         url: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428
         editable: true
