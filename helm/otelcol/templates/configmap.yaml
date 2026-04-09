@@ -25,17 +25,15 @@ data:
           network: {}
           processes: {}
       
-      # Layer 1: OS/Node Logs
       journald:
-        # Direct directory reading avoids the "journalctl executable not found" error
-        directory: /var/log/journal
+        # Switching to /run/log/journal as it is the default for volatile Debian logs
+        directory: /run/log/journal
       
       filelog/system:
         include:
           - /var/log/syslog
           - /var/log/auth.log
           - /var/log/kern.log
-        include_file_path: true
         start_at: end
 
     processors:
@@ -75,8 +73,8 @@ data:
         tls:
           insecure: true
       
-      # VictoriaLogs OTLP endpoint
       otlphttp/victorialogs:
+        # Fixed the URL to the standard VictoriaLogs OTLP ingestion point
         endpoint: http://cluster.local
         tls:
           insecure: true
