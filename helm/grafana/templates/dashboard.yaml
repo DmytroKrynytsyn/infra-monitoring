@@ -18,7 +18,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{ 
-            "expr": "100 * (1 - avg by (instance) (rate(system_cpu_time{state='idle'}[5m])))",
+            "expr": "100 * (1 - avg by (instance) (rate(system_cpu_time_seconds_total{state='idle'}[5m])))",
             "legendFormat": "{{ "{{" }}instance{{ "}}" }}" 
           }]
         },
@@ -30,7 +30,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{ 
-            "expr": "100 * (system_memory_usage{state='used'} / (system_memory_usage{state='used'} + system_memory_usage{state='free'} + system_memory_usage{state='cached'}))",
+            "expr": "100 * (system_memory_usage_bytes{state='used'} / sum by (instance) (system_memory_usage_bytes))",
             "legendFormat": "{{ "{{" }}instance{{ "}}" }}" 
           }]
         },
@@ -42,7 +42,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{ 
-            "expr": "100 * (system_filesystem_usage{mountpoint='/', state='used'} / system_filesystem_usage{mountpoint='/', state='total'})",
+            "expr": "100 * (sum by (instance) (system_filesystem_usage_bytes{mountpoint='/', state='used'}) / sum by (instance) (system_filesystem_usage_bytes{mountpoint='/'}))",
             "legendFormat": "{{ "{{" }}instance{{ "}}" }}" 
           }]
         },
