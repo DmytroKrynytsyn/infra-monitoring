@@ -30,7 +30,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{ 
-            "expr": "100 * (system_memory_usage_bytes{state='used'} / ignoring(state) group_left sum by (node, ip) (system_memory_usage_bytes))",
+            "expr": "100 * (system_memory_usage_bytes{state='used'} / on(node, ip) group_left sum by (node, ip) (system_memory_usage_bytes))",
             "legendFormat": "{{ "{{" }}node{{ "}}" }} ({{ "{{" }}ip{{ "}}" }})" 
           }]
         },
@@ -42,7 +42,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{ 
-            "expr": "100 * (sum by (node, ip) (system_filesystem_usage_bytes{mountpoint='/', state='used'}) / sum by (node, ip) (system_filesystem_usage_bytes{mountpoint='/'}))",
+            "expr": "100 * (sum by (node, ip) (system_filesystem_usage_bytes{mountpoint='/', state='used'}) / on(node, ip) group_left sum by (node, ip) (system_filesystem_usage_bytes{mountpoint='/'}))",
             "legendFormat": "{{ "{{" }}node{{ "}}" }} ({{ "{{" }}ip{{ "}}" }})" 
           }]
         },
