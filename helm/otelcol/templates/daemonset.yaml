@@ -40,6 +40,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: PATH
+              value: "/host/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           securityContext:
             runAsUser: 0
             privileged: true
@@ -66,7 +68,7 @@ spec:
               mountPath: /etc/machine-id
               readOnly: true
             - name: journalctl
-              mountPath: /usr/bin/journalctl
+              mountPath: /host/usr/bin/journalctl
               readOnly: true
       volumes:
         - name: config
