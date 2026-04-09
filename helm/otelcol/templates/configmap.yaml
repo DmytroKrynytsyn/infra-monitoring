@@ -73,7 +73,7 @@ data:
       
       otlphttp/victorialogs:
         # Correct path for VictoriaMetrics OTLP log ingestion
-        endpoint: http://cluster.local
+        endpoint: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428/insert/opentelemetry
         tls:
           insecure: true
 
