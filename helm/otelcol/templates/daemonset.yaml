@@ -41,7 +41,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: PATH
-              value: "/host/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              value: "/hostfs/usr/bin:/hostfs/usr/sbin:/hostfs/bin:/hostfs/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           securityContext:
             runAsUser: 0
             privileged: true
@@ -67,9 +67,6 @@ spec:
             - name: etcmachineid
               mountPath: /etc/machine-id
               readOnly: true
-            - name: journalctl
-              mountPath: /host/usr/bin/journalctl
-              readOnly: true
       volumes:
         - name: config
           configMap:
@@ -89,8 +86,4 @@ spec:
         - name: etcmachineid
           hostPath:
             path: /etc/machine-id
-            type: File
-        - name: journalctl
-          hostPath:
-            path: /usr/bin/journalctl
             type: File
