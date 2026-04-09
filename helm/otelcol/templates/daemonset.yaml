@@ -65,6 +65,9 @@ spec:
             - name: etcmachineid
               mountPath: /etc/machine-id
               readOnly: true
+            - name: journalctl
+              mountPath: /usr/bin/journalctl
+              readOnly: true
       volumes:
         - name: config
           configMap:
@@ -84,4 +87,8 @@ spec:
         - name: etcmachineid
           hostPath:
             path: /etc/machine-id
+            type: File
+        - name: journalctl
+          hostPath:
+            path: /usr/bin/journalctl
             type: File
