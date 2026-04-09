@@ -15,9 +15,7 @@ data:
           "title": "CPU Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-          "fieldConfig": {
-            "defaults": { "min": 0, "max": 100, "unit": "percent" }
-          },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [
             {
               "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
@@ -30,9 +28,7 @@ data:
           "title": "Memory Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-          "fieldConfig": {
-            "defaults": { "min": 0, "max": 100, "unit": "percent" }
-          },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [
             {
               "expr": "100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100)",
@@ -45,15 +41,31 @@ data:
           "title": "Disk Usage % (/)",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
-          "fieldConfig": {
-            "defaults": { "min": 0, "max": 100, "unit": "percent" }
-          },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [
             {
               "expr": "100 - (node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'} * 100)",
               "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
             }
           ]
+        },
+        {
+          "id": 4,
+          "title": "System Logs (VictoriaLogs)",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "datasource": { "type": "victoriametrics-logs-datasource" },
+          "targets": [
+            {
+              "expr": "node.name: \"debian1\"",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true
+          }
         }
       ],
       "schemaVersion": 38,

@@ -8,6 +8,10 @@ data:
     [server]
     http_port = 3000
 
+    [plugins]
+    # This ensures the plugin is recognized if pre-installed or via ENV
+    allow_loading_unsigned_plugins = victoriametrics-logs-datasource
+
     [auth]
     disable_login_form = false
 
@@ -19,26 +23,20 @@ data:
     datasources:
       - name: VictoriaMetrics
         type: prometheus
-        access: proxy
         url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
         isDefault: true
         editable: false
 
       - name: VictoriaLogs
         type: victoriametrics-logs-datasource
-        access: proxy
-        url: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428
+        url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
         editable: false
 
   dashboards.yaml: |
     apiVersion: 1
     providers:
       - name: default
-        orgId: 1
         folder: Homelab
         type: file
-        disableDeletion: false
-        editable: true
-        updateIntervalSeconds: 30
         options:
           path: /etc/grafana/provisioning/dashboards

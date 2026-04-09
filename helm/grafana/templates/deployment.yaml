@@ -26,6 +26,9 @@ spec:
               value: /etc/grafana/grafana.ini
             - name: GF_PATHS_PROVISIONING
               value: /etc/grafana/provisioning
+            # Automatically downloads the VictoriaLogs plugin on startup
+            - name: GF_INSTALL_PLUGINS
+              value: "victoriametrics-logs-datasource"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -41,7 +44,7 @@ spec:
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
             - name: dashboard
-              mountPath: /etc/grafana/provisioning/dashboards/cluster-nodes.json
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard.json
               subPath: dashboard.json
           readinessProbe:
             httpGet:
