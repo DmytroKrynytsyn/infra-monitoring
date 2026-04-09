@@ -38,7 +38,7 @@ data:
           "id": 3,
           "title": "Disk Usage % (/)",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{ 
@@ -48,6 +48,18 @@ data:
         },
         {
           "id": 4,
+          "title": "Network Traffic (Bytes/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "unit": "binbps" } },
+          "targets": [{ 
+            "expr": "sum by (node_name, node_ip, direction) (rate(system_network_io_bytes_total[5m]))",
+            "legendFormat": "{{ "{{" }}node_name{{ "}}" }} - {{ "{{" }}direction{{ "}}" }}" 
+          }]
+        },
+        {
+          "id": 5,
           "title": "System Logs",
           "type": "logs",
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
