@@ -51,10 +51,13 @@ data:
         },
         {
           "id": 4,
-          "title": "All System Logs",
+          "title": "System Logs (VictoriaLogs)",
           "type": "logs",
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
-          "datasource": { "type": "victoriametrics-logs-datasource" },
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "VictoriaLogs"
+          },
           "targets": [
             {
               "expr": "*",
