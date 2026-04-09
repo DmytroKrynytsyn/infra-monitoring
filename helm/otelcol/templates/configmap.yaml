@@ -27,6 +27,7 @@ data:
       
       # Layer 1: OS/Node Logs
       journald:
+        # Direct directory reading avoids the "journalctl executable not found" error
         directory: /var/log/journal
       
       filelog/system:
@@ -34,6 +35,7 @@ data:
           - /var/log/syslog
           - /var/log/auth.log
           - /var/log/kern.log
+        include_file_path: true
         start_at: end
 
     processors:
@@ -73,7 +75,7 @@ data:
         tls:
           insecure: true
       
-      # VictoriaLogs OTLP endpoint (usually port 9428 or 8428 depending on setup)
+      # VictoriaLogs OTLP endpoint
       otlphttp/victorialogs:
         endpoint: http://cluster.local
         tls:
@@ -86,7 +88,6 @@ data:
           processors: [resourcedetection, k8sattributes, attributes, batch]
           exporters: [prometheusremotewrite]
         
-        # New pipeline for Node/OS logs
         logs/system:
           receivers: [journald, filelog/system]
           processors: [resourcedetection, k8sattributes, batch]
