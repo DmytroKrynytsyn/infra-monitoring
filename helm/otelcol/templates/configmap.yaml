@@ -25,15 +25,13 @@ data:
           network: {}
           processes: {}
       
-      journald:
-        # Switching to /run/log/journal as it is the default for volatile Debian logs
-        directory: /run/log/journal
-      
+      # Using filelog for everything to avoid the journalctl binary error
       filelog/system:
         include:
           - /var/log/syslog
           - /var/log/auth.log
           - /var/log/kern.log
+          - /var/log/messages
         start_at: end
 
     processors:
@@ -74,7 +72,7 @@ data:
           insecure: true
       
       otlphttp/victorialogs:
-        # Fixed the URL to the standard VictoriaLogs OTLP ingestion point
+        # Correct path for VictoriaMetrics OTLP log ingestion
         endpoint: http://cluster.local
         tls:
           insecure: true
@@ -87,6 +85,7 @@ data:
           exporters: [prometheusremotewrite]
         
         logs/system:
-          receivers: [journald, filelog/system]
+          # Switched to filelog only to ensure the collector starts
+          receivers: [filelog/system]
           processors: [resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
