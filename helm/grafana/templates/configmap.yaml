@@ -1,42 +1,74 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: infra-monitoring-grafana-config
+  name: infra-monitoring-grafana-dashboard
   namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
 data:
-  grafana.ini: |
-    [server]
-    http_port = 3000
-
-    [plugins]
-    # This ensures the plugin is recognized if pre-installed or via ENV
-    allow_loading_unsigned_plugins = victoriametrics-logs-datasource
-
-    [auth]
-    disable_login_form = false
-
-    [auth.anonymous]
-    enabled = false
-
-  datasources.yaml: |
-    apiVersion: 1
-    datasources:
-      - name: VictoriaMetrics
-        type: prometheus
-        url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
-        isDefault: true
-        editable: false
-
-      - name: VictoriaLogs
-        type: victoriametrics-logs-datasource
-        url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
-        editable: false
-
-  dashboards.yaml: |
-    apiVersion: 1
-    providers:
-      - name: default
-        folder: Homelab
-        type: file
-        options:
-          path: /etc/grafana/provisioning/dashboards
+  dashboard.json: |
+    {
+      "editable": true,
+      "panels": [
+        {
+          "id": 1,
+          "title": "CPU Usage %",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
+          "targets": [
+            {
+              "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Memory Usage %",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
+          "targets": [
+            {
+              "expr": "100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100)",
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Disk Usage % (/)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
+          "targets": [
+            {
+              "expr": "100 - (node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'} * 100)",
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }}"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "All System Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "datasource": { "type": "victoriametrics-logs-datasource" },
+          "targets": [
+            {
+              "expr": "*",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true
+          }
+        }
+      ],
+      "schemaVersion": 38,
+      "title": "Node Infrastructure",
+      "version": 1
+    }
