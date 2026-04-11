@@ -69,7 +69,7 @@ data:
                   target_label: __address__
                   separator: ":"
                   regex: (.+);(.+)
-                  replacement: $1:$2
+                  replacement: $$1:$$2
 
                 - source_labels: [__meta_kubernetes_pod_name]
                   target_label: pod
