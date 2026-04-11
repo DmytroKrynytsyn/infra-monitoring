@@ -19,9 +19,36 @@ data:
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "sum(rate(http_requests_total[1m]))",
-            "legendFormat": "requests"
+            "expr": "sum by (pod) (rate(http_request_duration_seconds_count{job=\"agents-infra-test\"}[1m]))",
+            "legendFormat": "{{pod}}"
           }]
+        },
+        {
+          "id": 2,
+          "title": "P95 Latency (s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\"}[1m])))",
+            "legendFormat": "p95 {{pod}}"
+          }]
+        },
+        {
+          "id": 3,
+          "title": "App Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
+          "targets": [{
+            "expr": "{layer=\"app\"}",
+            "refId": "A"
+          }],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true
+          }
         }
       ],
       "schemaVersion": 38,

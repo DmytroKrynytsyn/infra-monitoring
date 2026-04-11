@@ -64,18 +64,12 @@ data:
                   action: keep
                   regex: "true"
 
-                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
-                  action: replace
-                  target_label: __address__
-                  regex: (.+)
-                  replacement: $$1
-
                 - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
                   action: replace
                   target_label: __address__
                   separator: ":"
                   regex: (.+);(.+)
-                  replacement: $$1:$$2
+                  replacement: $1:$2
 
                 - source_labels: [__meta_kubernetes_pod_name]
                   target_label: pod
@@ -92,6 +86,7 @@ data:
         operators:
           - type: regex_parser
             id: parse_cri
+            on_error: send
             regex: '^(?P<time>\S+) (?P<stream>stdout|stderr) (?P<flags>\S+) (?P<log>.*)$'
             timestamp:
               parse_from: attributes.time
@@ -101,6 +96,7 @@ data:
             to: body
           - type: regex_parser
             id: parse_path
+            on_error: send
             parse_from: attributes["log.file.path"]
             regex: '/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_[^/]+/(?P<container_name>[^/]+)/.*'
 
@@ -188,7 +184,7 @@ data:
 
         metrics/app:
           receivers: [prometheus/app]
-          processors: [resource/app, resourcedetection, batch]
+          processors: [resource/app, resourcedetection, k8sattributes, batch]
           exporters: [prometheusremotewrite]
 
         logs/system:
@@ -203,5 +199,5 @@ data:
 
         logs/app:
           receivers: [filelog/app]
-          processors: [resource/app, resourcedetection, batch]
+          processors: [resource/app, resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
