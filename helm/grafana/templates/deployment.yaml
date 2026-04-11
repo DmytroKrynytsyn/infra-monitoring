@@ -41,9 +41,11 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
 
           volumeMounts:
+            # Grafana storage
             - name: storage
               mountPath: /var/lib/grafana
 
+            # Main config
             - name: config
               mountPath: /etc/grafana/grafana.ini
               subPath: grafana.ini
@@ -56,18 +58,10 @@ spec:
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
 
-            # dashboards (FIXED)
-            - name: dashboard-infra
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard-infra.json
-              subPath: dashboard.json
-
-            - name: dashboard-kuber
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard-kuber.json
-              subPath: dashboard-kuber.json
-
-            - name: dashboard-app
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard-app.json
-              subPath: dashboard-app.json
+            # ✅ CLEAN: ONE dashboard directory only
+            - name: dashboards
+              mountPath: /etc/grafana/provisioning/dashboards
+              readOnly: true
 
           readinessProbe:
             httpGet:
@@ -84,22 +78,34 @@ spec:
             periodSeconds: 20
 
       volumes:
+        # Grafana DB
         - name: storage
           persistentVolumeClaim:
             claimName: infra-monitoring-grafana
 
+        # ConfigMap config
         - name: config
           configMap:
             name: infra-monitoring-grafana-config
 
-        - name: dashboard-infra
-          configMap:
-            name: infra-monitoring-grafana-dashboard-infra
+        # ✅ All dashboards mounted via ConfigMaps (clean + scalable)
+        - name: dashboards
+          projected:
+            sources:
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-infra
+                  items:
+                    - key: dashboard.json
+                      path: dashboard-infra.json
 
-        - name: dashboard-kuber
-          configMap:
-            name: infra-monitoring-grafana-dashboard-kuber
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-kuber
+                  items:
+                    - key: dashboard-kuber.json
+                      path: dashboard-kuber.json
 
-        - name: dashboard-app
-          configMap:
-            name: infra-monitoring-grafana-dashboard-app
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-app
+                  items:
+                    - key: dashboard-app.json
+                      path: dashboard-app.json
