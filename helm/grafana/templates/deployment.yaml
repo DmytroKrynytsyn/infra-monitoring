@@ -8,6 +8,7 @@ metadata:
 
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: infra-monitoring-grafana
@@ -40,11 +41,9 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
 
           volumeMounts:
-            # Grafana storage
             - name: storage
               mountPath: /var/lib/grafana
 
-            # Main config
             - name: config
               mountPath: /etc/grafana/grafana.ini
               subPath: grafana.ini
@@ -57,9 +56,18 @@ spec:
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
 
-            # ✅ CLEAN DASHBOARD MOUNT (NO subPath per file anymore)
-            - name: dashboards
-              mountPath: /etc/grafana/provisioning/dashboards
+            # dashboards (FIXED)
+            - name: dashboard-infra
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard-infra.json
+              subPath: dashboard.json
+
+            - name: dashboard-kuber
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard-kuber.json
+              subPath: dashboard-kuber.json
+
+            - name: dashboard-app
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard-app.json
+              subPath: dashboard-app.json
 
           readinessProbe:
             httpGet:
@@ -76,25 +84,22 @@ spec:
             periodSeconds: 20
 
       volumes:
-        # Grafana DB
         - name: storage
           persistentVolumeClaim:
             claimName: infra-monitoring-grafana
 
-        # Config
         - name: config
           configMap:
             name: infra-monitoring-grafana-config
 
-        # ✅ PROPER MULTI-DASHBOARD MOUNT
-        - name: dashboards
-          projected:
-            sources:
-              - configMap:
-                  name: infra-monitoring-grafana-dashboard-infra
+        - name: dashboard-infra
+          configMap:
+            name: infra-monitoring-grafana-dashboard-infra
 
-              - configMap:
-                  name: infra-monitoring-grafana-dashboard-kuber
+        - name: dashboard-kuber
+          configMap:
+            name: infra-monitoring-grafana-dashboard-kuber
 
-              - configMap:
-                  name: infra-monitoring-grafana-dashboard-app
+        - name: dashboard-app
+          configMap:
+            name: infra-monitoring-grafana-dashboard-app

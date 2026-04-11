@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: infra-monitoring-grafana-config
   namespace: monitoring
+
 data:
   grafana.ini: |
     [server]
@@ -17,7 +18,7 @@ data:
 
     [users]
     default_theme = light
-    
+
     [preferences]
     theme = light
 
@@ -46,7 +47,7 @@ data:
     providers:
       - name: default
         orgId: 1
-        folder: ''
+        folder: ""
         type: file
         disableDeletion: false
         editable: true
