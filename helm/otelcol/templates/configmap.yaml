@@ -50,9 +50,6 @@ data:
         auth_type: serviceAccount
         namespaces: []
 
-      # Scrapes /metrics from gateway and backend pods in agents-infra-test namespace.
-      # The pod annotation prometheus.io/scrape: "true" is used to filter targets.
-      # oauth2/bearer is not needed — VictoriaMetrics endpoint is internal.
       prometheus/app:
         config:
           scrape_configs:
@@ -63,31 +60,29 @@ data:
                   namespaces:
                     names: [agents-infra-test]
               relabel_configs:
-                # Only scrape pods with annotation prometheus.io/scrape: "true"
                 - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
                   action: keep
                   regex: "true"
-                # Use annotation prometheus.io/port if set, otherwise default 8000
+
                 - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
                   action: replace
                   target_label: __address__
                   regex: (.+)
-                  replacement: ${1}
+                  replacement: $$1
+
                 - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
                   action: replace
                   target_label: __address__
                   separator: ":"
                   regex: (.+);(.+)
-                  replacement: $1:$2
-                # Carry pod name and namespace as labels
+                  replacement: $$1:$$2
+
                 - source_labels: [__meta_kubernetes_pod_name]
                   target_label: pod
+
                 - source_labels: [__meta_kubernetes_namespace]
                   target_label: namespace
 
-      # Tails stdout logs from all containers in agents-infra-test namespace.
-      # /var/log/pods is mounted via hostPath in the DaemonSet.
-      # The glob pattern matches: /var/log/pods/<namespace>_<pod>_<uid>/<container>/*.log
       filelog/app:
         include:
           - /var/log/pods/agents-infra-test_*/*/*.log
@@ -95,18 +90,15 @@ data:
         include_file_path: true
         include_file_name: false
         operators:
-          # Parse the CRI log format: timestamp stream flags log
           - type: regex_parser
             id: parse_cri
             regex: '^(?P<time>\S+) (?P<stream>stdout|stderr) (?P<flags>\S+) (?P<log>.*)$'
             timestamp:
               parse_from: attributes.time
               layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-          # Promote the actual log line to the body
           - type: move
             from: attributes.log
             to: body
-          # Extract pod and container name from the file path
           - type: regex_parser
             id: parse_path
             parse_from: attributes["log.file.path"]
