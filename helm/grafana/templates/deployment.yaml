@@ -72,7 +72,7 @@ spec:
             name: infra-monitoring-grafana-config
         - name: dashboard-infra
           configMap:
-            name: infra-monitoring-grafana-dashboard
+            name: infra-monitoring-grafana-dashboard-infra
         - name: dashboard-kuber
           configMap:
             name: infra-monitoring-grafana-dashboard-kuber

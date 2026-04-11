@@ -8,6 +8,8 @@ metadata:
 data:
   dashboard-app.json: |
     {
+      "uid": "app",
+      "title": "App — agents-infra-test",
       "editable": true,
       "panels": [
         {
@@ -16,60 +18,13 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
           "targets": [{
-            "expr": "sum by (pod, handler, method) (rate(http_requests_total[1m]))",
-            "legendFormat": "{{ "{{" }}pod{{ "}}" }} {{ "{{" }}method{{ "}}" }} {{ "{{" }}handler{{ "}}" }}"
+            "expr": "sum(rate(http_requests_total[1m]))",
+            "legendFormat": "requests"
           }]
-        },
-        {
-          "id": 2,
-          "title": "Latency p99 (seconds)",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": { "defaults": { "unit": "s" } },
-          "targets": [{
-            "expr": "histogram_quantile(0.99, sum by (pod, handler, le) (rate(http_request_duration_seconds_bucket[1m])))",
-            "legendFormat": "{{ "{{" }}pod{{ "}}" }} {{ "{{" }}handler{{ "}}" }}"
-          }]
-        },
-        {
-          "id": 3,
-          "title": "Error Rate (5xx req/s)",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [{
-            "expr": "sum by (pod, handler) (rate(http_requests_total{status_code=~\"5..\"}[1m]))",
-            "legendFormat": "{{ "{{" }}pod{{ "}}" }} {{ "{{" }}handler{{ "}}" }}"
-          }]
-        },
-        {
-          "id": 4,
-          "title": "Container Memory Working Set (bytes)",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": { "defaults": { "unit": "bytes" } },
-          "targets": [{
-            "expr": "k8s_pod_memory_working_set_bytes{k8s_namespace_name=\"agents-infra-test\"}",
-            "legendFormat": "{{ "{{" }}k8s_pod_name{{ "}}" }}"
-          }]
-        },
-        {
-          "id": 5,
-          "title": "App Logs",
-          "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
-          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
-          "targets": [{ "expr": "{layer=\"app\"}", "refId": "A" }],
-          "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessages": true }
         }
       ],
       "schemaVersion": 38,
-      "title": "App — agents-infra-test",
       "time": { "from": "now-1h", "to": "now" },
       "refresh": "10s",
       "version": 1
