@@ -25,6 +25,7 @@ spec:
             - --storageDataPath=/storage
             - --retentionPeriod={{ .Values.retentionPeriod }}
             - --httpListenAddr=:{{ .Values.port }}
+            - --extraStreamFields=layer
           ports:
             - containerPort: {{ .Values.port }}
           resources:
