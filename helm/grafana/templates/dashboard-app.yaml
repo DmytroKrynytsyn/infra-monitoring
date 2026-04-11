@@ -10,7 +10,7 @@ data:
     {{- `
     {
       "uid": "app",
-      "title": "App — agents-infra-test",
+      "title": app — agents-infra-test",
       "editable": true,
       "panels": [
         {

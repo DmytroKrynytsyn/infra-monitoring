@@ -5,9 +5,9 @@ metadata:
   namespace: monitoring
   labels:
     grafana_dashboard: "1"
-
 data:
   dashboard-kuber.json: |
+    {{- `
     {
       "uid": "kuber",
       "title": "Kubernetes Infrastructure",
@@ -22,7 +22,7 @@ data:
           "fieldConfig": { "defaults": { "min": 0, "max": 1, "unit": "percentunit" } },
           "targets": [{
             "expr": "k8s_pod_cpu_utilization_ratio",
-            "legendFormat": "{{`{{k8s_pod_name}}`}} / {{`{{k8s_namespace_name}}`}}"
+            "legendFormat": "{{k8s_pod_name}} / {{k8s_namespace_name}}"
           }]
         },
         {
@@ -34,7 +34,7 @@ data:
           "fieldConfig": { "defaults": { "unit": "bytes" } },
           "targets": [{
             "expr": "k8s_pod_memory_working_set_bytes",
-            "legendFormat": "{{`{{k8s_pod_name}}`}} / {{`{{k8s_namespace_name}}`}}"
+            "legendFormat": "{{k8s_pod_name}} / {{k8s_namespace_name}}"
           }]
         },
         {
@@ -46,7 +46,7 @@ data:
           "fieldConfig": { "defaults": { "unit": "binbps" } },
           "targets": [{
             "expr": "rate(k8s_pod_network_io_bytes_total[1m])",
-            "legendFormat": "{{`{{k8s_pod_name}}`}} - {{`{{direction}}`}}"
+            "legendFormat": "{{k8s_pod_name}} - {{direction}}"
           }]
         },
         {
@@ -59,11 +59,11 @@ data:
           "targets": [
             {
               "expr": "k8s_pod_memory_working_set_bytes",
-              "legendFormat": "working_set {{`{{k8s_pod_name}}`}}"
+              "legendFormat": "working_set {{k8s_pod_name}}"
             },
             {
               "expr": "k8s_pod_memory_usage_bytes",
-              "legendFormat": "usage {{`{{k8s_pod_name}}`}}"
+              "legendFormat": "usage {{k8s_pod_name}}"
             }
           ]
         },
@@ -93,3 +93,5 @@ data:
       "time": { "from": "now-1h", "to": "now" },
       "refresh": "10s",
       "version": 1
+    }
+    `}}
