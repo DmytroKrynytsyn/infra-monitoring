@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: infra-monitoring-grafana-dashboard-app
+  name: infra-monitoring-grafana-dashboard-kuber
   namespace: monitoring
   labels:
     grafana_dashboard: "1"
