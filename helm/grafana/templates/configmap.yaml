@@ -15,8 +15,11 @@ data:
     [plugins]
     allow_loading_unsigned_plugins = victoriametrics-logs-datasource
 
-    [ui]
+    [users]
     default_theme = light
+    
+    [preferences]
+    theme = light
 
     [dashboards]
     min_refresh_interval = 10s
