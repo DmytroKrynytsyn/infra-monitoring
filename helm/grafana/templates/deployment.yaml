@@ -5,77 +5,96 @@ metadata:
   namespace: monitoring
   labels:
     app: infra-monitoring-grafana
+
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: infra-monitoring-grafana
+
   template:
     metadata:
       labels:
         app: infra-monitoring-grafana
+
     spec:
       containers:
         - name: grafana
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
             - containerPort: {{ .Values.port }}
+
           env:
             - name: GF_PATHS_CONFIG
               value: /etc/grafana/grafana.ini
+
             - name: GF_PATHS_PROVISIONING
               value: /etc/grafana/provisioning
+
             - name: GF_INSTALL_PLUGINS
               value: "victoriametrics-logs-datasource"
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
           volumeMounts:
+            # Grafana storage
             - name: storage
               mountPath: /var/lib/grafana
+
+            # Main config
             - name: config
               mountPath: /etc/grafana/grafana.ini
               subPath: grafana.ini
+
             - name: config
               mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
               subPath: datasources.yaml
+
             - name: config
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
-            - name: dashboard-infra
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard-infra.json
-              subPath: dashboard.json
-            - name: dashboard-kuber
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard-kuber.json
-              subPath: dashboard-kuber.json
-            - name: dashboard-app
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard-app.json
-              subPath: dashboard-app.json
+
+            # ✅ CLEAN DASHBOARD MOUNT (NO subPath per file anymore)
+            - name: dashboards
+              mountPath: /etc/grafana/provisioning/dashboards
+
           readinessProbe:
             httpGet:
               path: /api/health
               port: {{ .Values.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
+
           livenessProbe:
             httpGet:
               path: /api/health
               port: {{ .Values.port }}
             initialDelaySeconds: 30
             periodSeconds: 20
+
       volumes:
+        # Grafana DB
         - name: storage
           persistentVolumeClaim:
             claimName: infra-monitoring-grafana
+
+        # Config
         - name: config
           configMap:
             name: infra-monitoring-grafana-config
-        - name: dashboard-infra
-          configMap:
-            name: infra-monitoring-grafana-dashboard-infra
-        - name: dashboard-kuber
-          configMap:
-            name: infra-monitoring-grafana-dashboard-kuber
-        - name: dashboard-app
-          configMap:
-            name: infra-monitoring-grafana-dashboard-app
+
+        # ✅ PROPER MULTI-DASHBOARD MOUNT
+        - name: dashboards
+          projected:
+            sources:
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-infra
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-kuber
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-app
