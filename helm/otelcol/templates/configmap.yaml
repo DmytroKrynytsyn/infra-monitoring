@@ -5,7 +5,16 @@ metadata:
   namespace: monitoring
 data:
   config.yaml: |
+
+    # ─────────────────────────────────────────────
+    # RECEIVERS — where data comes from
+    # ─────────────────────────────────────────────
+
     receivers:
+
+      # Reads CPU/memory/disk/network/processes
+      # from the host OS via /hostfs (mounted in the DaemonSet).
+      # root_path tells otelcol to look there instead of /.
       hostmetrics:
         collection_interval: 30s
         root_path: /hostfs
@@ -25,20 +34,55 @@ data:
           network: {}
           processes: {}
 
+      # Talks to the local kubelet on each node (NODE_IP comes
+      # from the DaemonSet env var). Gives you per-pod and
+      # per-container CPU/memory/network metrics.
+      # insecure_skip_verify because k3s kubelet uses a self-signed cert.
+      kubeletstats:
+        collection_interval: 30s
+        auth_type: serviceAccount
+        endpoint: "https://${env:NODE_IP}:10250"
+        insecure_skip_verify: true
+        metric_groups:
+          - node
+          - pod
+          - container
+
+      # Tails /var/log/syslog (mounted via hostPath in the DaemonSet).
+      # start_at: beginning means it reads existing lines on first start,
+      # not just new ones.
       filelog/system:
         include:
           - /var/log/syslog
         start_at: beginning
 
-    processors:
-      batch:
-        timeout: 10s
+      # Watches the Kubernetes API for cluster events — pod
+      # OOMKills, failed image pulls, crashloops, scheduling
+      # failures. Very cheap: it just subscribes, no polling.
+      # Empty namespaces list = watch everything.
+      k8s_events:
+        auth_type: serviceAccount
+        namespaces: []
 
+    # ─────────────────────────────────────────────
+    # PROCESSORS — transform data before exporting
+    # ─────────────────────────────────────────────
+
+    processors:
+
+      # Detects the hostname and any env vars set on the pod
+      # and stamps them onto every metric/log as resource attributes.
+      # Combined with the DaemonSet env vars (NODE_NAME, NODE_IP)
+      # this gives you per-node attribution on everything.
       resourcedetection:
         detectors: [env, system]
         system:
           hostname_sources: [os]
 
+      # Reads the Kubernetes API to find out which pod/namespace/
+      # deployment owns the data, and adds those as attributes.
+      # passthrough: false means it actually enriches the data,
+      # not just passes it through as-is.
       k8sattributes:
         auth_type: serviceAccount
         passthrough: false
@@ -50,6 +94,8 @@ data:
             - k8s.node.name
             - k8s.container.name
 
+      # Copies node.name and node.ip into short "node" and "ip"
+      # attributes so PromQL/LogsQL queries are less verbose.
       attributes:
         actions:
           - key: node
@@ -59,7 +105,44 @@ data:
             from_attribute: node.ip
             action: insert
 
+      # Stamps layer=infra on every log line from this pipeline.
+      # "resource" processor sets attributes on the resource
+      # (the emitting entity), which VictoriaLogs stores as a label.
+      resource/infra:
+        attributes:
+          - key: layer
+            value: infra
+            action: insert
+
+      # Same idea, different value — for Kubernetes event logs.
+      resource/kuber:
+        attributes:
+          - key: layer
+            value: kuber
+            action: insert
+
+      # Reserved for the future app pipeline.
+      resource/app:
+        attributes:
+          - key: layer
+            value: app
+            action: insert
+
+      # Buffers data and flushes every 10s in one batch.
+      # Reduces the number of HTTP requests to VictoriaMetrics/Logs.
+      batch:
+        timeout: 10s
+
+    # ─────────────────────────────────────────────
+    # EXPORTERS — where data goes
+    # ─────────────────────────────────────────────
+
     exporters:
+
+      # Prometheus Remote Write protocol — this is how
+      # VictoriaMetrics ingests metrics. resource_to_telemetry_conversion
+      # promotes resource attributes (like node, ip) onto every
+      # metric as labels, so they show up in Grafana.
       prometheusremotewrite:
         endpoint: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428/api/v1/write
         resource_to_telemetry_conversion:
@@ -67,19 +150,41 @@ data:
         tls:
           insecure: true
 
+      # OTLP HTTP — VictoriaLogs speaks this natively.
       otlphttp/victorialogs:
         endpoint: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428/insert/opentelemetry
         tls:
           insecure: true
 
+    # ─────────────────────────────────────────────
+    # SERVICE — wires receivers → processors → exporters
+    # Each pipeline is independent. A processor listed in
+    # one pipeline does not affect another.
+    # ─────────────────────────────────────────────
+
     service:
       pipelines:
+
+        # Host + pod/container metrics → VictoriaMetrics
         metrics:
-          receivers: [hostmetrics]
+          receivers: [hostmetrics, kubeletstats]
           processors: [resourcedetection, k8sattributes, attributes, batch]
           exporters: [prometheusremotewrite]
 
+        # OS syslog → VictoriaLogs, tagged layer=infra
         logs/system:
           receivers: [filelog/system]
-          processors: [resourcedetection, k8sattributes, batch]
+          processors: [resource/infra, resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
+
+        # Kubernetes events → VictoriaLogs, tagged layer=kuber
+        logs/k8s_events:
+          receivers: [k8s_events]
+          processors: [resource/kuber, resourcedetection, batch]
+          exporters: [otlphttp/victorialogs]
+
+        # Uncomment when you add app-level logging:
+        # logs/app:
+        #   receivers: [filelog/app]
+        #   processors: [resource/app, resourcedetection, k8sattributes, batch]
+        #   exporters: [otlphttp/victorialogs]
