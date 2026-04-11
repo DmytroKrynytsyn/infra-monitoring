@@ -26,7 +26,6 @@ spec:
               value: /etc/grafana/grafana.ini
             - name: GF_PATHS_PROVISIONING
               value: /etc/grafana/provisioning
-            # Automatically downloads the VictoriaLogs plugin on startup
             - name: GF_INSTALL_PLUGINS
               value: "victoriametrics-logs-datasource"
           resources:
@@ -43,9 +42,12 @@ spec:
             - name: config
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
-            - name: dashboard
-              mountPath: /etc/grafana/provisioning/dashboards/dashboard.json
+            - name: dashboard-infra
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard-infra.json
               subPath: dashboard.json
+            - name: dashboard-kuber
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard-kuber.json
+              subPath: dashboard-kuber.json
           readinessProbe:
             httpGet:
               path: /api/health
@@ -65,6 +67,9 @@ spec:
         - name: config
           configMap:
             name: infra-monitoring-grafana-config
-        - name: dashboard
+        - name: dashboard-infra
           configMap:
             name: infra-monitoring-grafana-dashboard
+        - name: dashboard-kuber
+          configMap:
+            name: infra-monitoring-grafana-dashboard-kuber

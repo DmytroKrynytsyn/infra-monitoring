@@ -64,7 +64,7 @@ data:
           "type": "logs",
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
           "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
-          "targets": [{ "expr": "*", "refId": "A" }],
+          [{ "expr": "{layer=\"infra\"}", "refId": "A" }]
           "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessages": true }
         }
       ],
