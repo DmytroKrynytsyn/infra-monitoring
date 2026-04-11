@@ -48,7 +48,8 @@ data:
           "options": {
             "showTime": true,
             "sortOrder": "Descending",
-            "wrapLogMessages": true
+            "wrapLogMessages": true,
+            "displayedFields": ["k8s.pod.name", "body"]
           }
         }
       ],
