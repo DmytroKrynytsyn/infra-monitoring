@@ -18,10 +18,71 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "min": 0, "max": 1, "unit": "percentunit" } },
           "targets": [{
             "expr": "k8s_pod_cpu_utilization_ratio",
-            "legendFormat": "{{ \"{{\" }}k8s_pod_name{{ \"}}\" }}"
+            "legendFormat": "{{`{{`}}k8s_pod_name{{`}}`}} / {{`{{`}}k8s_namespace_name{{`}}`}}"
           }]
+        },
+        {
+          "id": 2,
+          "title": "Pod Memory Working Set (bytes)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "targets": [{
+            "expr": "k8s_pod_memory_working_set_bytes",
+            "legendFormat": "{{`{{`}}k8s_pod_name{{`}}`}} / {{`{{`}}k8s_namespace_name{{`}}`}}"
+          }]
+        },
+        {
+          "id": 3,
+          "title": "Pod Network I/O (bytes/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "unit": "binbps" } },
+          "targets": [{
+            "expr": "rate(k8s_pod_network_io_bytes_total[1m])",
+            "legendFormat": "{{`{{`}}k8s_pod_name{{`}}`}} - {{`{{`}}direction{{`}}`}}"
+          }]
+        },
+        {
+          "id": 4,
+          "title": "Pod Memory: Working Set vs Usage (bytes)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "targets": [
+            {
+              "expr": "k8s_pod_memory_working_set_bytes",
+              "legendFormat": "working_set {{`{{`}}k8s_pod_name{{`}}`}}"
+            },
+            {
+              "expr": "k8s_pod_memory_usage_bytes",
+              "legendFormat": "usage {{`{{`}}k8s_pod_name{{`}}`}}"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Kubernetes Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
+          "targets": [
+            {
+              "expr": "{layer=\"kuber\"}",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true
+          }
         }
       ],
       "schemaVersion": 38,
