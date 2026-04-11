@@ -70,5 +70,7 @@ data:
       ],
       "schemaVersion": 38,
       "title": "Node Infrastructure",
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
       "version": 1
     }
