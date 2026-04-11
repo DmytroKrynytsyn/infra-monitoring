@@ -48,6 +48,9 @@ spec:
             - name: dashboard-kuber
               mountPath: /etc/grafana/provisioning/dashboards/dashboard-kuber.json
               subPath: dashboard-kuber.json
+            - name: dashboard-app
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard-app.json
+              subPath: dashboard-app.json
           readinessProbe:
             httpGet:
               path: /api/health
@@ -73,3 +76,6 @@ spec:
         - name: dashboard-kuber
           configMap:
             name: infra-monitoring-grafana-dashboard-kuber
+        - name: dashboard-app
+          configMap:
+            name: infra-monitoring-grafana-dashboard-app
