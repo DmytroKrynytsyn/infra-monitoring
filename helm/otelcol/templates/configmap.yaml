@@ -7,14 +7,11 @@ data:
   config.yaml: |
 
     # ─────────────────────────────────────────────
-    # RECEIVERS — where data comes from
+    # RECEIVERS
     # ─────────────────────────────────────────────
 
     receivers:
 
-      # Reads CPU/memory/disk/network/processes
-      # from the host OS via /hostfs (mounted in the DaemonSet).
-      # root_path tells otelcol to look there instead of /.
       hostmetrics:
         collection_interval: 30s
         root_path: /hostfs
@@ -34,10 +31,6 @@ data:
           network: {}
           processes: {}
 
-      # Talks to the local kubelet on each node (NODE_IP comes
-      # from the DaemonSet env var). Gives you per-pod and
-      # per-container CPU/memory/network metrics.
-      # insecure_skip_verify because k3s kubelet uses a self-signed cert.
       kubeletstats:
         collection_interval: 30s
         auth_type: serviceAccount
@@ -48,41 +41,88 @@ data:
           - pod
           - container
 
-      # Tails /var/log/syslog (mounted via hostPath in the DaemonSet).
-      # start_at: beginning means it reads existing lines on first start,
-      # not just new ones.
       filelog/system:
         include:
           - /var/log/syslog
         start_at: beginning
 
-      # Watches the Kubernetes API for cluster events — pod
-      # OOMKills, failed image pulls, crashloops, scheduling
-      # failures. Very cheap: it just subscribes, no polling.
-      # Empty namespaces list = watch everything.
       k8s_events:
         auth_type: serviceAccount
         namespaces: []
 
+      # Scrapes /metrics from gateway and backend pods in agents-infra-test namespace.
+      # The pod annotation prometheus.io/scrape: "true" is used to filter targets.
+      # oauth2/bearer is not needed — VictoriaMetrics endpoint is internal.
+      prometheus/app:
+        config:
+          scrape_configs:
+            - job_name: agents-infra-test
+              scrape_interval: 30s
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names: [agents-infra-test]
+              relabel_configs:
+                # Only scrape pods with annotation prometheus.io/scrape: "true"
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: "true"
+                # Use annotation prometheus.io/port if set, otherwise default 8000
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: (.+)
+                  replacement: ${1}
+                - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  separator: ":"
+                  regex: (.+);(.+)
+                  replacement: $1:$2
+                # Carry pod name and namespace as labels
+                - source_labels: [__meta_kubernetes_pod_name]
+                  target_label: pod
+                - source_labels: [__meta_kubernetes_namespace]
+                  target_label: namespace
+
+      # Tails stdout logs from all containers in agents-infra-test namespace.
+      # /var/log/pods is mounted via hostPath in the DaemonSet.
+      # The glob pattern matches: /var/log/pods/<namespace>_<pod>_<uid>/<container>/*.log
+      filelog/app:
+        include:
+          - /var/log/pods/agents-infra-test_*/*/*.log
+        start_at: beginning
+        include_file_path: true
+        include_file_name: false
+        operators:
+          # Parse the CRI log format: timestamp stream flags log
+          - type: regex_parser
+            id: parse_cri
+            regex: '^(?P<time>\S+) (?P<stream>stdout|stderr) (?P<flags>\S+) (?P<log>.*)$'
+            timestamp:
+              parse_from: attributes.time
+              layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+          # Promote the actual log line to the body
+          - type: move
+            from: attributes.log
+            to: body
+          # Extract pod and container name from the file path
+          - type: regex_parser
+            id: parse_path
+            parse_from: attributes["log.file.path"]
+            regex: '/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_[^/]+/(?P<container_name>[^/]+)/.*'
+
     # ─────────────────────────────────────────────
-    # PROCESSORS — transform data before exporting
+    # PROCESSORS
     # ─────────────────────────────────────────────
 
     processors:
 
-      # Detects the hostname and any env vars set on the pod
-      # and stamps them onto every metric/log as resource attributes.
-      # Combined with the DaemonSet env vars (NODE_NAME, NODE_IP)
-      # this gives you per-node attribution on everything.
       resourcedetection:
         detectors: [env, system]
         system:
           hostname_sources: [os]
 
-      # Reads the Kubernetes API to find out which pod/namespace/
-      # deployment owns the data, and adds those as attributes.
-      # passthrough: false means it actually enriches the data,
-      # not just passes it through as-is.
       k8sattributes:
         auth_type: serviceAccount
         passthrough: false
@@ -94,8 +134,6 @@ data:
             - k8s.node.name
             - k8s.container.name
 
-      # Copies node.name and node.ip into short "node" and "ip"
-      # attributes so PromQL/LogsQL queries are less verbose.
       attributes:
         actions:
           - key: node
@@ -105,44 +143,33 @@ data:
             from_attribute: node.ip
             action: insert
 
-      # Stamps layer=infra on every log line from this pipeline.
-      # "resource" processor sets attributes on the resource
-      # (the emitting entity), which VictoriaLogs stores as a label.
       resource/infra:
         attributes:
           - key: layer
             value: infra
             action: insert
 
-      # Same idea, different value — for Kubernetes event logs.
       resource/kuber:
         attributes:
           - key: layer
             value: kuber
             action: insert
 
-      # Reserved for the future app pipeline.
       resource/app:
         attributes:
           - key: layer
             value: app
             action: insert
 
-      # Buffers data and flushes every 10s in one batch.
-      # Reduces the number of HTTP requests to VictoriaMetrics/Logs.
       batch:
         timeout: 10s
 
     # ─────────────────────────────────────────────
-    # EXPORTERS — where data goes
+    # EXPORTERS
     # ─────────────────────────────────────────────
 
     exporters:
 
-      # Prometheus Remote Write protocol — this is how
-      # VictoriaMetrics ingests metrics. resource_to_telemetry_conversion
-      # promotes resource attributes (like node, ip) onto every
-      # metric as labels, so they show up in Grafana.
       prometheusremotewrite:
         endpoint: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428/api/v1/write
         resource_to_telemetry_conversion:
@@ -150,41 +177,39 @@ data:
         tls:
           insecure: true
 
-      # OTLP HTTP — VictoriaLogs speaks this natively.
       otlphttp/victorialogs:
         endpoint: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428/insert/opentelemetry
         tls:
           insecure: true
 
     # ─────────────────────────────────────────────
-    # SERVICE — wires receivers → processors → exporters
-    # Each pipeline is independent. A processor listed in
-    # one pipeline does not affect another.
+    # SERVICE
     # ─────────────────────────────────────────────
 
     service:
       pipelines:
 
-        # Host + pod/container metrics → VictoriaMetrics
         metrics:
           receivers: [hostmetrics, kubeletstats]
           processors: [resourcedetection, k8sattributes, attributes, batch]
           exporters: [prometheusremotewrite]
 
-        # OS syslog → VictoriaLogs, tagged layer=infra
+        metrics/app:
+          receivers: [prometheus/app]
+          processors: [resource/app, resourcedetection, batch]
+          exporters: [prometheusremotewrite]
+
         logs/system:
           receivers: [filelog/system]
           processors: [resource/infra, resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
 
-        # Kubernetes events → VictoriaLogs, tagged layer=kuber
         logs/k8s_events:
           receivers: [k8s_events]
           processors: [resource/kuber, resourcedetection, batch]
           exporters: [otlphttp/victorialogs]
 
-        # Uncomment when you add app-level logging:
-        # logs/app:
-        #   receivers: [filelog/app]
-        #   processors: [resource/app, resourcedetection, k8sattributes, batch]
-        #   exporters: [otlphttp/victorialogs]
+        logs/app:
+          receivers: [filelog/app]
+          processors: [resource/app, resourcedetection, batch]
+          exporters: [otlphttp/victorialogs]
