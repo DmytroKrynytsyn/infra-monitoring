@@ -7,10 +7,10 @@ metadata:
     grafana_dashboard: "1"
 data:
   dashboard-app.json: |
-    {{- `
+    {{ `
     {
       "uid": "app",
-      "title": app — agents-infra-test",
+      "title": "App - agents-infra-test",
       "editable": true,
       "panels": [
         {
