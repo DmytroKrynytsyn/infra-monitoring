@@ -26,7 +26,7 @@ data:
           "targets": [
             {
               "expr": "100 * (1 - avg by (node_name, node_ip) (rate(system_cpu_time_seconds_total{state='idle'}[1m])))",
-              "legendFormat": "{{node_name}} ({{node_ip}})"
+              "legendFormat": "{{`{{`}}node_name{{`}}`}} ({{`{{`}}node_ip{{`}}`}})"
             }
           ]
         },
@@ -42,7 +42,7 @@ data:
           "targets": [
             {
               "expr": "100 * (system_memory_usage_bytes{state='used'} / on(node_name, node_ip) group_left sum by (node_name, node_ip) (system_memory_usage_bytes))",
-              "legendFormat": "{{node_name}} ({{node_ip}})"
+              "legendFormat": "{{`{{`}}node_name{{`}}`}} ({{`{{`}}node_ip{{`}}`}})"
             }
           ]
         },
@@ -58,7 +58,7 @@ data:
           "targets": [
             {
               "expr": "100 * (sum by (node_name, node_ip) (system_filesystem_usage_bytes{mountpoint='/', state='used'}) / on(node_name, node_ip) group_left sum by (node_name, node_ip) (system_filesystem_usage_bytes{mountpoint='/'}))",
-              "legendFormat": "{{node_name}} ({{node_ip}})"
+              "legendFormat": "{{`{{`}}node_name{{`}}`}} ({{`{{`}}node_ip{{`}}`}})"
             }
           ]
         },
@@ -74,7 +74,7 @@ data:
           "targets": [
             {
               "expr": "sum by (node_name, node_ip, direction) (rate(system_network_io_bytes_total[1m]))",
-              "legendFormat": "{{node_name}} - {{direction}}"
+              "legendFormat": "{{`{{`}}node_name{{`}}`}} - {{`{{`}}direction{{`}}`}}"
             }
           ]
         },
