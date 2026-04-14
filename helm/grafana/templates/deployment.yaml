@@ -4,7 +4,13 @@ metadata:
   name: infra-monitoring-grafana
   namespace: monitoring
   labels:
-    app: infra-monitoring-grafana
+      app: infra-monitoring-grafana
+  annotations:
+      checksum/dashboards-infra: {{ include (print $.Template.BasePath "/dashboard-infra.yaml") . | sha256sum }}
+      checksum/dashboards-kuber: {{ include (print $.Template.BasePath "/dashboard-kuber.yaml") . | sha256sum }}
+      checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
+      checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+
 
 spec:
   replicas: 1
