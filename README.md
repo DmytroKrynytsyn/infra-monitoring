@@ -1,4 +1,5 @@
 # infra-monitoring
+![infra_monitoring_stack_arrows_v3](https://github.com/user-attachments/assets/884d2abe-5a3f-4bc5-9831-61cc62827e42)
 
 Full-stack Kubernetes observability across three layers — OS, Kubernetes, and application. Metrics and logs collected by OpenTelemetry Collector, stored in VictoriaMetrics and VictoriaLogs, visualised in Grafana. One `kubectl apply` bootstraps everything via ArgoCD.
 
