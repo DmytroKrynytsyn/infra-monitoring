@@ -26,14 +26,22 @@ data:
         },
         {
           "id": 2,
-          "title": "P95 Latency (s)",
+          "title": "Latency (s)",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\"}[1m])))",
-            "legendFormat": "p95 {{pod}}"
-          }]
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\"}[1m])))",
+              "legendFormat": "p95 {{pod}}",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\"}[1m])))",
+              "legendFormat": "p99 {{pod}}",
+              "refId": "B"
+            }
+          ]
         },
         {
           "id": 3,
