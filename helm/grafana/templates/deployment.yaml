@@ -9,8 +9,8 @@ metadata:
       checksum/dashboards-infra: {{ include (print $.Template.BasePath "/dashboard-infra.yaml") . | sha256sum }}
       checksum/dashboards-kuber: {{ include (print $.Template.BasePath "/dashboard-kuber.yaml") . | sha256sum }}
       checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
+      checksum/dashboards-llm: {{ include (print $.Template.BasePath "/dashboard-llm.yaml") . | sha256sum }}
       checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-
 
 spec:
   replicas: 1
@@ -56,7 +56,6 @@ spec:
               mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
               subPath: datasources.yaml
 
-            # ✅ ONLY ONE dashboards directory mount (NO subPath anywhere)
             - name: dashboards
               mountPath: /etc/grafana/provisioning/dashboards
 
@@ -83,7 +82,6 @@ spec:
           configMap:
             name: infra-monitoring-grafana-config
 
-        # ✅ ALL dashboards + provisioning in one place
         - name: dashboards
           projected:
             sources:
@@ -110,3 +108,9 @@ spec:
                   items:
                     - key: dashboard-app.json
                       path: dashboard-app.json
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-llm
+                  items:
+                    - key: dashboard-llm.json
+                      path: dashboard-llm.json
