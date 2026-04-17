@@ -15,87 +15,65 @@ data:
       "panels": [
         {
           "id": 1,
-          "title": "Inference Request Rate (req/s)",
+          "title": "kbrain CPU Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "rate(ollama_request_duration_seconds_count[1m])",
-            "legendFormat": "{{model}}"
+            "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state='idle', host_name='debian100'}[1m])))",
+            "legendFormat": "cpu"
           }]
         },
         {
           "id": 2,
-          "title": "Inference Duration p95/p99 (s)",
+          "title": "kbrain Memory Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum by (model, le) (rate(ollama_request_duration_seconds_bucket[1m])))",
-              "legendFormat": "p95 {{model}}"
-            },
-            {
-              "expr": "histogram_quantile(0.99, sum by (model, le) (rate(ollama_request_duration_seconds_bucket[1m])))",
-              "legendFormat": "p99 {{model}}"
-            }
-          ]
+          "targets": [{
+            "expr": "100 * (system_memory_usage_bytes{state='used', host_name='debian100'} / on(host_name) group_left sum by (host_name) (system_memory_usage_bytes{host_name='debian100'}))",
+            "legendFormat": "memory"
+          }]
         },
         {
           "id": 3,
-          "title": "Tokens Generated (tokens/s)",
+          "title": "kbrain Disk Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "rate(ollama_tokens_total[1m])",
-            "legendFormat": "{{model}}"
+            "expr": "100 * (1 - (system_filesystem_usage_bytes{state='free', host_name='debian100', mountpoint='/'} / system_filesystem_usage_bytes{state='reserved', host_name='debian100', mountpoint='/'}))",
+            "legendFormat": "disk /"
           }]
         },
         {
           "id": 4,
-          "title": "Model Load Status",
-          "type": "stat",
+          "title": "kbrain Network I/O (bytes/s)",
+          "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "ollama_model_loaded",
-            "legendFormat": "{{model}}"
-          }]
+          "targets": [
+            {
+              "expr": "rate(system_network_io_bytes_total{direction='receive', host_name='debian100'}[1m])",
+              "legendFormat": "rx {{device}}"
+            },
+            {
+              "expr": "rate(system_network_io_bytes_total{direction='transmit', host_name='debian100'}[1m])",
+              "legendFormat": "tx {{device}}"
+            }
+          ]
         },
         {
           "id": 5,
-          "title": "kbrain CPU Usage %",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "100 * (1 - avg by (node_name) (rate(system_cpu_time_seconds_total{state='idle', node_name='kbrain'}[1m])))",
-            "legendFormat": "{{node_name}}"
-          }]
-        },
-        {
-          "id": 6,
-          "title": "kbrain Memory Usage %",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "100 * (system_memory_usage_bytes{state='used', node_name='kbrain'} / on(node_name) group_left sum by (node_name) (system_memory_usage_bytes{node_name='kbrain'}))",
-            "legendFormat": "{{node_name}}"
-          }]
-        },
-        {
-          "id": 7,
           "title": "LLM Logs",
           "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
           "datasource": {
             "type": "victoriametrics-logs-datasource",
             "uid": "VictoriaLogs"
           },
           "targets": [{
-            "expr": "{layer=\"llm\"}",
+            "expr": "{host_name=\"debian100\"}",
             "refId": "A"
           }],
           "options": {
