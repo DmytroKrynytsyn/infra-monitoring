@@ -42,7 +42,7 @@ data:
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (system_filesystem_usage_bytes{state='used', host_name='debian100', mountpoint='/'} / (system_filesystem_usage_bytes{state='used', host_name='debian100', mountpoint='/'} + system_filesystem_usage_bytes{state='free', host_name='debian100', mountpoint='/'} + system_filesystem_usage_bytes{state='reserved', host_name='debian100', mountpoint='/'}))",
+            "expr": "100 * (system_filesystem_usage_bytes{state='used', host_name='debian100', mountpoint='/'} / on(host_name, mountpoint) sum without(state) (system_filesystem_usage_bytes{host_name='debian100', mountpoint='/'}))",
             "legendFormat": "disk /"
           }]
         },
