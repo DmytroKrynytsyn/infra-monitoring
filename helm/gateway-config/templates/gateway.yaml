@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.gateway.name }}
+  namespace: {{ .Values.gateway.namespace }}
+spec:
+  gatewayClassName: eg
+  listeners:
+    - name: http
+      port: {{ .Values.gateway.httpPort }}
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https
+      port: {{ .Values.gateway.httpsPort }}
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: homelab-tls
+            namespace: {{ .Values.gateway.namespace }}
+      allowedRoutes:
+        namespaces:
+          from: All

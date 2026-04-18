@@ -1,0 +1,5 @@
+gateway:
+  name: homelab-gateway
+  namespace: envoy-gateway-system
+  httpPort: 80
+  httpsPort: 443
