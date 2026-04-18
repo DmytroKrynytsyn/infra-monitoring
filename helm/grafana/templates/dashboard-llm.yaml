@@ -20,7 +20,7 @@ data:
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (1 - avg by (node_name) (rate(system_cpu_time_seconds_total{state='idle', node_name='debian100'}[1m])))",
+            "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state='idle', host_name='debian100'}[1m])))",
             "legendFormat": "cpu"
           }]
         },
@@ -31,7 +31,7 @@ data:
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (system_memory_usage_bytes{state='used', node_name='debian100'} / on(node_name) group_left sum by (node_name) (system_memory_usage_bytes{node_name='debian100'}))",
+            "expr": "100 * (system_memory_usage_bytes{state='used', host_name='debian100'} / on(host_name) group_left sum by (host_name) (system_memory_usage_bytes{host_name='debian100'}))",
             "legendFormat": "memory"
           }]
         },
@@ -42,7 +42,7 @@ data:
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (system_filesystem_usage_bytes{state='used', node_name='debian100', mountpoint='/'} / (system_filesystem_usage_bytes{state='used', node_name='debian100', mountpoint='/'} + system_filesystem_usage_bytes{state='free', node_name='debian100', mountpoint='/'} + system_filesystem_usage_bytes{state='reserved', node_name='debian100', mountpoint='/'}))",
+            "expr": "100 * (system_filesystem_usage_bytes{state='used', host_name='debian100', mountpoint='/'} / on(host_name, mountpoint) sum without(state) (system_filesystem_usage_bytes{host_name='debian100', mountpoint='/'}))",
             "legendFormat": "disk /"
           }]
         },
@@ -54,11 +54,11 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [
             {
-              "expr": "rate(system_network_io_bytes_total{direction='receive', node_name='debian100'}[1m])",
+              "expr": "rate(system_network_io_bytes_total{direction='receive', host_name='debian100'}[1m])",
               "legendFormat": "rx {{device}}"
             },
             {
-              "expr": "rate(system_network_io_bytes_total{direction='transmit', node_name='debian100'}[1m])",
+              "expr": "rate(system_network_io_bytes_total{direction='transmit', host_name='debian100'}[1m])",
               "legendFormat": "tx {{device}}"
             }
           ]
@@ -73,7 +73,7 @@ data:
             "uid": "VictoriaLogs"
           },
           "targets": [{
-            "expr": "{node_name=\"debian100\"}",
+            "expr": "{host.name=\"debian100\"}",
             "refId": "A"
           }],
           "options": {
