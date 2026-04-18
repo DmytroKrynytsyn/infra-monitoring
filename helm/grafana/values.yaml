@@ -7,9 +7,6 @@ port: 3000
 
 ingress:
   host: grafana.local
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
 
 storage:
   size: 2Gi
