@@ -125,19 +125,13 @@ data:
             - k8s.node.name
             - k8s.container.name
 
-      attributes:
-        actions:
-          - key: node
-            from_attribute: k8s.node.name
-            action: insert
-          - key: ip
-            from_attribute: node.ip
-            action: insert
-
       resource/infra:
         attributes:
           - key: layer
             value: infra
+            action: insert
+          - key: purpose
+            value: kubernetes
             action: insert
 
       resource/kuber:
@@ -145,11 +139,17 @@ data:
           - key: layer
             value: kuber
             action: insert
+          - key: purpose
+            value: kubernetes
+            action: insert
 
       resource/app:
         attributes:
           - key: layer
             value: app
+            action: insert
+          - key: purpose
+            value: kubernetes
             action: insert
 
       batch:
@@ -182,7 +182,7 @@ data:
 
         metrics:
           receivers: [hostmetrics, kubeletstats]
-          processors: [resourcedetection, k8sattributes, attributes, batch]
+          processors: [resourcedetection, k8sattributes, resource/infra, batch]
           exporters: [prometheusremotewrite]
 
         metrics/app:
