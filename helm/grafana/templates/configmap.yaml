@@ -1,91 +1,56 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: infra-monitoring-grafana-dashboard-llm
+  name: infra-monitoring-grafana-config
   namespace: monitoring
-  labels:
-    grafana_dashboard: "1"
+
 data:
-  dashboard-llm.json: |
-    {{- `
-    {
-      "uid": "llm",
-      "title": "LLM - kbrain",
-      "editable": true,
-      "panels": [
-        {
-          "id": 1,
-          "title": "kbrain CPU Usage %",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state='idle', host_name='debian100'}[1m])))",
-            "legendFormat": "cpu"
-          }]
-        },
-        {
-          "id": 2,
-          "title": "kbrain Memory Usage %",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "100 * (system_memory_usage_bytes{state='used', host_name='debian100'} / on(host_name) group_left sum by (host_name) (system_memory_usage_bytes{host_name='debian100'}))",
-            "legendFormat": "memory"
-          }]
-        },
-        {
-          "id": 3,
-          "title": "kbrain Disk Usage %",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [{
-            "expr": "100 * (system_filesystem_usage_bytes{state='used', host_name='debian100', mountpoint='/'} / on(host_name, mountpoint) sum without(state) (system_filesystem_usage_bytes{host_name='debian100', mountpoint='/'}))",
-            "legendFormat": "disk /"
-          }]
-        },
-        {
-          "id": 4,
-          "title": "kbrain Network I/O (bytes/s)",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "targets": [
-            {
-              "expr": "rate(system_network_io_bytes_total{direction='receive', host_name='debian100'}[1m])",
-              "legendFormat": "rx {{device}}"
-            },
-            {
-              "expr": "rate(system_network_io_bytes_total{direction='transmit', host_name='debian100'}[1m])",
-              "legendFormat": "tx {{device}}"
-            }
-          ]
-        },
-        {
-          "id": 5,
-          "title": "LLM Logs",
-          "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
-          "datasource": {
-            "type": "victoriametrics-logs-datasource",
-            "uid": "VictoriaLogs"
-          },
-          "targets": [{
-            "expr": "{host.name=\"debian100\"}",
-            "refId": "A"
-          }],
-          "options": {
-            "showTime": true,
-            "sortOrder": "Descending",
-            "wrapLogMessages": true
-          }
-        }
-      ],
-      "schemaVersion": 38,
-      "time": { "from": "now-1h", "to": "now" },
-      "refresh": "10s",
-      "version": 1
-    }
-    `}}
+  grafana.ini: |
+    [server]
+    http_port = 3000
+
+    [auth.anonymous]
+    enabled = true
+    org_role = Admin
+
+    [plugins]
+    allow_loading_unsigned_plugins = victoriametrics-logs-datasource
+
+    [users]
+    default_theme = light
+
+    [preferences]
+    theme = light
+
+    [dashboards]
+    min_refresh_interval = 10s
+
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: VictoriaMetrics
+        type: prometheus
+        access: proxy
+        url: http://infra-monitoring-victoriametrics.monitoring.svc.cluster.local:8428
+        isDefault: true
+        editable: true
+
+      - name: VictoriaLogs
+        type: victoriametrics-logs-datasource
+        uid: VictoriaLogs
+        access: proxy
+        url: http://infra-monitoring-victorialogs.monitoring.svc.cluster.local:9428
+        editable: true
+
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 10
+        options:
+          path: /etc/grafana/provisioning/dashboards
