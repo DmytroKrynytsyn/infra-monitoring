@@ -1,4 +1,4 @@
-  certificate:
+certificate:
   name: homelab-tls
   namespace: envoy-gateway-system
   dnsNames:
@@ -8,5 +8,5 @@
     - victorialogs.local
     - argocd.local
     - testapp.local
-  duration: 87600h    # 10 years
-  renewBefore: 720h   # 30 days 
+  duration: 87600h
+  renewBefore: 720h
