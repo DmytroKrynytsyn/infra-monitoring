@@ -13,3 +13,19 @@ spec:
       kind: Secret
     - group: gateway.networking.k8s.io
       kind: Gateway
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: argocd-to-gateway
+  namespace: envoy-gateway-system
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: argocd
+  to:
+    - group: ""
+      kind: Secret
+    - group: gateway.networking.k8s.io
+      kind: Gateway
