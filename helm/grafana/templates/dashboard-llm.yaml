@@ -15,51 +15,51 @@ data:
       "panels": [
         {
           "id": 1,
-          "title": "kbrain CPU Usage %",
+          "title": "CPU Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state='idle', host_name='debian100'}[1m])))",
-            "legendFormat": "cpu"
+            "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state='idle', purpose='llm'}[1m])))",
+            "legendFormat": "{{host_name}}"
           }]
         },
         {
           "id": 2,
-          "title": "kbrain Memory Usage %",
+          "title": "Memory Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (system_memory_usage_bytes{state='used', host_name='debian100'} / on(host_name) group_left sum by (host_name) (system_memory_usage_bytes{host_name='debian100'}))",
-            "legendFormat": "memory"
+            "expr": "100 * (system_memory_usage_bytes{state='used', purpose='llm'} / on(host_name) group_left sum by (host_name) (system_memory_usage_bytes{purpose='llm'}))",
+            "legendFormat": "{{host_name}}"
           }]
         },
         {
           "id": 3,
-          "title": "kbrain Disk Usage %",
+          "title": "Disk Usage %",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "100 * (system_filesystem_usage_bytes{state='used', host_name='debian100', mountpoint='/'} / on(host_name, mountpoint) sum without(state) (system_filesystem_usage_bytes{host_name='debian100', mountpoint='/'}))",
-            "legendFormat": "disk /"
+            "expr": "100 * (system_filesystem_usage_bytes{state='used', purpose='llm', mountpoint='/'} / on(host_name, mountpoint) sum without(state) (system_filesystem_usage_bytes{purpose='llm', mountpoint='/'}))",
+            "legendFormat": "{{host_name}}"
           }]
         },
         {
           "id": 4,
-          "title": "kbrain Network I/O (bytes/s)",
+          "title": "Network I/O (bytes/s)",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [
             {
-              "expr": "rate(system_network_io_bytes_total{direction='receive', host_name='debian100'}[1m])",
-              "legendFormat": "rx {{device}}"
+              "expr": "rate(system_network_io_bytes_total{direction='receive', purpose='llm'}[1m])",
+              "legendFormat": "rx {{host_name}}"
             },
             {
-              "expr": "rate(system_network_io_bytes_total{direction='transmit', host_name='debian100'}[1m])",
-              "legendFormat": "tx {{device}}"
+              "expr": "rate(system_network_io_bytes_total{direction='transmit', purpose='llm'}[1m])",
+              "legendFormat": "tx {{host_name}}"
             }
           ]
         },
@@ -73,7 +73,7 @@ data:
             "uid": "VictoriaLogs"
           },
           "targets": [{
-            "expr": "{host.name=\"debian100\"}",
+            "expr": "{purpose=\"llm\"}",
             "refId": "A"
           }],
           "options": {

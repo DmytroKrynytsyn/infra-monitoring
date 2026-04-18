@@ -5,7 +5,6 @@ metadata:
   namespace: monitoring
   labels:
     grafana_dashboard: "1"
-
 data:
   dashboard.json: |
     {{- `
@@ -20,15 +19,11 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": {
-            "defaults": { "min": 0, "max": 100, "unit": "percent" }
-          },
-          "targets": [
-            {
-              "expr": "100 * (1 - avg by (node_name, node_ip) (rate(system_cpu_time_seconds_total{state='idle'}[1m])))",
-              "legendFormat": "{{node_name}} ({{node_ip}})"
-            }
-          ]
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
+          "targets": [{
+            "expr": "100 * (1 - avg by (host_name, host_ip) (rate(system_cpu_time_seconds_total{state='idle', purpose='kubernetes'}[1m])))",
+            "legendFormat": "{{host_name}} ({{host_ip}})"
+          }]
         },
         {
           "id": 2,
@@ -36,15 +31,11 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": {
-            "defaults": { "min": 0, "max": 100, "unit": "percent" }
-          },
-          "targets": [
-            {
-              "expr": "100 * (system_memory_usage_bytes{state='used'} / on(node_name, node_ip) group_left sum by (node_name, node_ip) (system_memory_usage_bytes))",
-              "legendFormat": "{{node_name}} ({{node_ip}})"
-            }
-          ]
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
+          "targets": [{
+            "expr": "100 * (system_memory_usage_bytes{state='used', purpose='kubernetes'} / on(host_name, host_ip) group_left sum by (host_name, host_ip) (system_memory_usage_bytes{purpose='kubernetes'}))",
+            "legendFormat": "{{host_name}} ({{host_ip}})"
+          }]
         },
         {
           "id": 3,
@@ -52,15 +43,11 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": {
-            "defaults": { "min": 0, "max": 100, "unit": "percent" }
-          },
-          "targets": [
-            {
-              "expr": "100 * (sum by (node_name, node_ip) (system_filesystem_usage_bytes{mountpoint='/', state='used'}) / on(node_name, node_ip) group_left sum by (node_name, node_ip) (system_filesystem_usage_bytes{mountpoint='/'}))",
-              "legendFormat": "{{node_name}} ({{node_ip}})"
-            }
-          ]
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
+          "targets": [{
+            "expr": "100 * (sum by (host_name, host_ip) (system_filesystem_usage_bytes{mountpoint='/', state='used', purpose='kubernetes'}) / on(host_name, host_ip) group_left sum by (host_name, host_ip) (system_filesystem_usage_bytes{mountpoint='/', purpose='kubernetes'}))",
+            "legendFormat": "{{host_name}} ({{host_ip}})"
+          }]
         },
         {
           "id": 4,
@@ -68,15 +55,11 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": {
-            "defaults": { "unit": "binbps" }
-          },
-          "targets": [
-            {
-              "expr": "sum by (node_name, node_ip, direction) (rate(system_network_io_bytes_total[1m]))",
-              "legendFormat": "{{node_name}} - {{direction}}"
-            }
-          ]
+          "fieldConfig": { "defaults": { "unit": "binbps" } },
+          "targets": [{
+            "expr": "sum by (host_name, host_ip, direction) (rate(system_network_io_bytes_total{purpose='kubernetes'}[1m]))",
+            "legendFormat": "{{host_name}} - {{direction}}"
+          }]
         },
         {
           "id": 5,
@@ -87,12 +70,10 @@ data:
             "type": "victoriametrics-logs-datasource",
             "uid": "VictoriaLogs"
           },
-          "targets": [
-            {
-              "expr": "{layer=\"infra\"}",
-              "refId": "A"
-            }
-          ],
+          "targets": [{
+            "expr": "{layer=\"infra\", purpose=\"kubernetes\"}",
+            "refId": "A"
+          }],
           "options": {
             "showTime": true,
             "sortOrder": "Descending",
