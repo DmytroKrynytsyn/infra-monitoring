@@ -31,7 +31,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "node.name=$(NODE_NAME),node.ip=$(NODE_IP)"
+              value: "host.name=$(NODE_NAME),host.ip=$(NODE_IP)"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
