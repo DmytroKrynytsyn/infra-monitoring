@@ -10,7 +10,7 @@ data:
     {{- `
     {
       "uid": "kuber",
-      "title": "Kubernetes Infrastructure",
+      "title": "kubernetes cluster",
       "editable": true,
       "panels": [
         {

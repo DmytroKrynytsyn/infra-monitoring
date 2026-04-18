@@ -10,7 +10,7 @@ data:
     {{- `
     {
       "uid": "infra",
-      "title": "Node Infrastructure",
+      "title": "cluster hosts",
       "editable": true,
       "panels": [
         {

@@ -10,7 +10,7 @@ data:
     {{- `
     {
       "uid": "llm",
-      "title": "LLM - kbrain",
+      "title": "llm hosts",
       "editable": true,
       "panels": [
         {
