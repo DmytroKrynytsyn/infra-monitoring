@@ -1,20 +1,15 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: infra-monitoring-victoriametrics
   namespace: monitoring
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
-  ingressClassName: traefik
+  parentRefs:
+    - name: homelab-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - victoriametrics.local
   rules:
-    - host: victoriametrics.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: infra-monitoring-victoriametrics
-                port:
-                  number: {{ .Values.service.port }}
+    - backendRefs:
+        - name: infra-monitoring-victoriametrics
+          port: {{ .Values.service.port }}

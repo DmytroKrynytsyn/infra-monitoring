@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: monitoring-to-gateway
+  namespace: envoy-gateway-system
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: monitoring
+  to:
+    - group: ""
+      kind: Secret
+    - group: gateway.networking.k8s.io
+      kind: Gateway
