@@ -11,6 +11,8 @@ Full-stack Kubernetes observability across three layers — OS, Kubernetes, and 
 | VictoriaMetrics | Metrics storage — 1-month retention |
 | VictoriaLogs | Log storage — 30-day retention |
 | Grafana | Unified UI — datasources and dashboards auto-provisioned |
+| Envoy Gateway | Gateway API ingress — HTTP + HTTPS with HTTP/2 |
+| cert-manager | Automatic TLS certificate provisioning |
 
 ## Telemetry layers
 
@@ -38,8 +40,6 @@ filelog/app                 →  resource/app · k8sattributes · batch       �
 
 ## Dashboards
 
-Three dashboards ship pre-provisioned as ConfigMaps — no manual import required.
-
 | Dashboard | Panels |
 |---|---|
 | Node Infrastructure | CPU, memory, disk, network per node · system logs |
@@ -48,13 +48,30 @@ Three dashboards ship pre-provisioned as ConfigMaps — no manual import require
 
 All panels use the `layer` label as the primary filter (`{layer="infra"}`, `{layer="kuber"}`, `{layer="app"}`).
 
+## Routing
+
+All services exposed via Envoy Gateway using the Kubernetes Gateway API. TLS terminates at the Gateway level — cert-manager provisions a self-signed wildcard cert for `*.local` automatically.
+
+| Service | URL | Protocol |
+|---|---|---|
+| Grafana | `https://grafana.local` | HTTPS |
+| VictoriaMetrics | `http://victoriametrics.local` | HTTP |
+| VictoriaLogs | `http://victorialogs.local` | HTTP |
+| ArgoCD | `http://argocd.local` | HTTP |
+
 ## Bootstrap
 
 ```bash
 kubectl apply -f argocd/app-of-apps.yaml
 ```
 
-ArgoCD creates the `monitoring` namespace and deploys all four components. Add `<node-ip> grafana.local` to `/etc/hosts`, then open `https://grafana.local`. Anonymous admin access is enabled by default.
+Add to `/etc/hosts`:
+
+```
+<node-ip> grafana.local victoriametrics.local victorialogs.local argocd.local
+```
+
+Then open `https://grafana.local`. Anonymous admin access is enabled by default.
 
 ## Design notes
 
@@ -64,4 +81,6 @@ ArgoCD creates the `monitoring` namespace and deploys all four components. Add `
 
 **VictoriaMetrics + VictoriaLogs over Prometheus + Loki** — single-binary each, lower memory footprint, native OpenTelemetry ingestion on VictoriaLogs.
 
-**`layer` label as routing key** — one processor attribute per pipeline is enough to cleanly separate all three signal tiers in Grafana.
+**Gateway API** — uses `HTTPRoute` resources instead of `Ingress`. TLS terminates at the shared `homelab-gateway` in `envoy-gateway-system`. Cross-namespace routing permitted via `ReferenceGrant` resources.
+
+**cert-manager** — self-signed `ClusterIssuer` provisions `homelab-tls` secret in `envoy-gateway-system`, referenced directly by the Gateway HTTPS listener.
