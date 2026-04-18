@@ -5,6 +5,11 @@ metadata:
   namespace: {{ .Values.gateway.namespace }}
 spec:
   gatewayClassName: eg
+  infrastructure:
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: homelab-proxy
   listeners:
     - name: http
       port: {{ .Values.gateway.httpPort }}
@@ -12,7 +17,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-
     - name: https
       port: {{ .Values.gateway.httpsPort }}
       protocol: HTTPS
