@@ -17,10 +17,7 @@ data:
         root_path: /hostfs
         scrapers:
           cpu: {}
-          memory:
-            metrics:
-              "system.paging.usage":
-                enabled: true
+          memory: {}
           disk: {}
           filesystem:
             exclude_mount_points:
@@ -33,6 +30,7 @@ data:
               match_type: strict
           network: {}
           processes: {}
+          paging: {}
 
       kubeletstats:
         collection_interval: 30s
