@@ -86,7 +86,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{
-            "expr": "100 * (system_paging_usage_bytes{state='used', purpose='llm'} / ignoring(state) sum by (host_name) (system_paging_usage_bytes{purpose='llm'}))",
+            "expr": "100 * (system_paging_usage_bytes{state='used', purpose='llm'} / on(host_name) sum by (host_name) (system_paging_usage_bytes{purpose='llm'}))",
             "legendFormat": "{{host_name}}"
           }]
         },
