@@ -39,13 +39,13 @@ data:
         },
         {
           "id": 7,
-          "title": "Load Average (1m)",
+          "title": "Load Average % of CPU capacity",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": { "defaults": { "unit": "short" } },
+          "fieldConfig": { "defaults": { "min": 0, "unit": "percent" } },
           "targets": [{
-            "expr": "system_cpu_load_average_1m{purpose='kubernetes'}",
+            "expr": "100 * system_cpu_load_average_1m{purpose='kubernetes'} / on(host_name) count by (host_name) (system_cpu_time_seconds_total{state='idle', purpose='kubernetes'})",
             "legendFormat": "{{host_name}}"
           }]
         },
@@ -81,7 +81,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{
-            "expr": "100 * (system_paging_usage_bytes{state='used', purpose='kubernetes'} / on(host_name) group_left (system_paging_usage_bytes{state='used', purpose='kubernetes'} + system_paging_usage_bytes{state='free', purpose='kubernetes'}))",
+            "expr": "100 * (system_paging_usage_bytes{state='used', purpose='kubernetes'} / ignoring(state) sum by (host_name) (system_paging_usage_bytes{purpose='kubernetes'}))",
             "legendFormat": "{{host_name}}"
           }]
         },
