@@ -62,10 +62,22 @@ data:
           }]
         },
         {
+          "id": 6,
+          "title": "Swap Usage (bytes)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "targets": [{
+            "expr": "system_paging_usage_bytes{state='used', purpose='kubernetes'}",
+            "legendFormat": "{{host_name}}"
+          }]
+        },
+        {
           "id": 5,
           "title": "System Logs",
           "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 16 },
           "datasource": {
             "type": "victoriametrics-logs-datasource",
             "uid": "VictoriaLogs"
