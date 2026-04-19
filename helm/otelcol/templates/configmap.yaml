@@ -30,7 +30,12 @@ data:
               match_type: strict
           network: {}
           processes: {}
-          paging: {}
+          paging:
+            metrics:
+              system.paging.usage:
+                enabled: true
+              system.paging.utilization:
+                enabled: true
 
       kubeletstats:
         collection_interval: 30s
