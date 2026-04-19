@@ -19,7 +19,7 @@ data:
           cpu: {}
           memory:
             metrics:
-              system.paging.usage:
+              "system.paging.usage":
                 enabled: true
           disk: {}
           filesystem:
