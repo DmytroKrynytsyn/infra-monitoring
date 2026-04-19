@@ -17,7 +17,7 @@ data:
           "id": 1,
           "title": "CPU Usage %",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{
@@ -29,7 +29,7 @@ data:
           "id": 2,
           "title": "Memory Usage %",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{
@@ -38,10 +38,22 @@ data:
           }]
         },
         {
+          "id": 7,
+          "title": "Load Average (1m)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "targets": [{
+            "expr": "system_cpu_load_average_1m{purpose='kubernetes'}",
+            "legendFormat": "{{host_name}}"
+          }]
+        },
+        {
           "id": 3,
           "title": "Disk Usage %",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{
@@ -53,7 +65,7 @@ data:
           "id": 4,
           "title": "Network Traffic (Bytes/s)",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "fieldConfig": { "defaults": { "unit": "binbps" } },
           "targets": [{
@@ -63,13 +75,13 @@ data:
         },
         {
           "id": 6,
-          "title": "Swap Usage (bytes)",
+          "title": "Swap Usage %",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
-          "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "fieldConfig": { "defaults": { "min": 0, "max": 100, "unit": "percent" } },
           "targets": [{
-            "expr": "system_paging_usage_bytes{state='used', purpose='kubernetes'}",
+            "expr": "100 * (system_paging_usage_bytes{state='used', purpose='kubernetes'} / on(host_name) group_left (system_paging_usage_bytes{state='used', purpose='kubernetes'} + system_paging_usage_bytes{state='free', purpose='kubernetes'}))",
             "legendFormat": "{{host_name}}"
           }]
         },
@@ -77,7 +89,7 @@ data:
           "id": 5,
           "title": "System Logs",
           "type": "logs",
-          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 16 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
           "datasource": {
             "type": "victoriametrics-logs-datasource",
             "uid": "VictoriaLogs"
