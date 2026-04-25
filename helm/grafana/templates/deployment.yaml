@@ -10,6 +10,7 @@ metadata:
       checksum/dashboards-kuber: {{ include (print $.Template.BasePath "/dashboard-kuber.yaml") . | sha256sum }}
       checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
       checksum/dashboards-llm: {{ include (print $.Template.BasePath "/dashboard-llm.yaml") . | sha256sum }}
+      checksum/dashboards-telegram-bot: {{ include (print $.Template.BasePath "/dashboard-telegram-bot.yaml") . | sha256sum }}
       checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 
 spec:
