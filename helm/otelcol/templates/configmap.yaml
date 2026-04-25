@@ -111,7 +111,7 @@ data:
             regex: '^(?P<time>\S+) (?P<stream>stdout|stderr) (?P<flags>\S+) (?P<log>.*)$'
             timestamp:
               parse_from: attributes.time
-              layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+              layout: '%Y-%m-%dT%H:%M:%S.%L%j'
           - type: move
             from: attributes.log
             to: body
