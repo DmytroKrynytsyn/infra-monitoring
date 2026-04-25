@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infra-monitoring-grafana-dashboard-telegram-bot
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  dashboard-telegram-bot.json: |
+    {{ `
+    {
+      "uid": "telegram-bot",
+      "title": "app - telegram-bot-on-llm",
+      "editable": true,
+      "panels": [
+        {
+          "id": 1,
+          "title": "Request Rate (req/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (pod) (rate(http_request_duration_seconds_count{job=\"telegram-bot-on-llm\"}[1m]))",
+            "legendFormat": "{{pod}}"
+          }]
+        },
+        {
+          "id": 2,
+          "title": "Latency p95/p99 (s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"telegram-bot-on-llm\"}[1m])))",
+              "legendFormat": "p95 {{pod}}",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"telegram-bot-on-llm\"}[1m])))",
+              "legendFormat": "p99 {{pod}}",
+              "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "App Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
+          "targets": [{
+            "expr": "{layer=\"app\", k8s.namespace.name=\"telegram-bot-on-llm\"}",
+            "refId": "A"
+          }],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true,
+            "displayedFields": ["k8s.pod.name", "body"]
+          }
+        }
+      ],
+      "schemaVersion": 38,
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
+      "version": 1
+    }
+    `}}

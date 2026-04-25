@@ -65,23 +65,42 @@ data:
                 - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
                   action: keep
                   regex: "true"
-
                 - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
                   action: replace
                   target_label: __address__
                   separator: ":"
                   regex: (.+);(.+)
                   replacement: $$1:$$2
-
                 - source_labels: [__meta_kubernetes_pod_name]
                   target_label: pod
+                - source_labels: [__meta_kubernetes_namespace]
+                  target_label: namespace
 
+            - job_name: telegram-bot-on-llm
+              scrape_interval: 30s
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names: [telegram-bot-on-llm]
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: "true"
+                - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  separator: ":"
+                  regex: (.+);(.+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_pod_name]
+                  target_label: pod
                 - source_labels: [__meta_kubernetes_namespace]
                   target_label: namespace
 
       filelog/app:
         include:
           - /var/log/pods/agents-infra-test_*/*/*.log
+          - /var/log/pods/telegram-bot-on-llm_*/*/*.log
         start_at: beginning
         include_file_path: true
         include_file_name: false
