@@ -15,9 +15,39 @@ data:
       "panels": [
         {
           "id": 1,
-          "title": "Request Rate (req/s)",
+          "title": "LLM Request Rate (req/s)",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (model) (rate(llm_request_duration_seconds_count{job=\"telegram-bot-on-llm\"}[1m]))",
+            "legendFormat": "{{model}}"
+          }]
+        },
+        {
+          "id": 2,
+          "title": "LLM Latency p95/p99 (s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (le, model) (rate(llm_request_duration_seconds_bucket{job=\"telegram-bot-on-llm\"}[5m])))",
+              "legendFormat": "p95 {{model}}",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (le, model) (rate(llm_request_duration_seconds_bucket{job=\"telegram-bot-on-llm\"}[5m])))",
+              "legendFormat": "p99 {{model}}",
+              "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "HTTP Request Rate (req/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
             "expr": "sum by (pod) (rate(http_request_duration_seconds_count{job=\"telegram-bot-on-llm\"}[1m]))",
@@ -25,10 +55,10 @@ data:
           }]
         },
         {
-          "id": 2,
-          "title": "Latency p95/p99 (s)",
+          "id": 4,
+          "title": "HTTP Latency p95/p99 (s)",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [
             {
@@ -44,10 +74,10 @@ data:
           ]
         },
         {
-          "id": 3,
+          "id": 5,
           "title": "App Logs",
           "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
           "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
           "targets": [{
             "expr": "{layer=\"app\", k8s.namespace.name=\"telegram-bot-on-llm\"}",
