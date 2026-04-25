@@ -4,14 +4,14 @@ metadata:
   name: infra-monitoring-grafana
   namespace: monitoring
   labels:
-      app: infra-monitoring-grafana
+    app: infra-monitoring-grafana
   annotations:
-      checksum/dashboards-infra: {{ include (print $.Template.BasePath "/dashboard-infra.yaml") . | sha256sum }}
-      checksum/dashboards-kuber: {{ include (print $.Template.BasePath "/dashboard-kuber.yaml") . | sha256sum }}
-      checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
-      checksum/dashboards-llm: {{ include (print $.Template.BasePath "/dashboard-llm.yaml") . | sha256sum }}
-      checksum/dashboards-telegram-bot: {{ include (print $.Template.BasePath "/dashboard-telegram-bot.yaml") . | sha256sum }}
-      checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    checksum/dashboards-infra: {{ include (print $.Template.BasePath "/dashboard-infra.yaml") . | sha256sum }}
+    checksum/dashboards-kuber: {{ include (print $.Template.BasePath "/dashboard-kuber.yaml") . | sha256sum }}
+    checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
+    checksum/dashboards-llm: {{ include (print $.Template.BasePath "/dashboard-llm.yaml") . | sha256sum }}
+    checksum/dashboards-telegram-bot: {{ include (print $.Template.BasePath "/dashboard-telegram-bot.yaml") . | sha256sum }}
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 
 spec:
   replicas: 1
@@ -115,3 +115,9 @@ spec:
                   items:
                     - key: dashboard-llm.json
                       path: dashboard-llm.json
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-telegram-bot
+                  items:
+                    - key: dashboard-telegram-bot.json
+                      path: dashboard-telegram-bot.json
