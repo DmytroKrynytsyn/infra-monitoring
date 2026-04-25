@@ -20,24 +20,24 @@ data:
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [{
-            "expr": "sum by (pod) (rate(http_request_duration_seconds_count{job=\"agents-infra-test\"}[1m]))",
+            "expr": "sum by (pod) (rate(http_request_duration_seconds_count{job=\"agents-infra-test\", namespace=\"agents-infra-test\"}[1m]))",
             "legendFormat": "{{pod}}"
           }]
         },
         {
           "id": 2,
-          "title": "Latency (s)",
+          "title": "Latency p95/p99 (s)",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
           "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\", namespace=\"agents-infra-test\"}[1m])))",
               "legendFormat": "p95 {{pod}}",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.99, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\"}[1m])))",
+              "expr": "histogram_quantile(0.99, sum by (pod, le) (rate(http_request_duration_seconds_bucket{job=\"agents-infra-test\", namespace=\"agents-infra-test\"}[1m])))",
               "legendFormat": "p99 {{pod}}",
               "refId": "B"
             }
@@ -50,20 +50,20 @@ data:
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
           "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
           "targets": [{
-            "expr": "{layer=\"app\"}",
+            "expr": "{layer=\"app\", namespace=\"agents-infra-test\"}",
             "refId": "A"
           }],
           "options": {
             "showTime": true,
             "sortOrder": "Descending",
             "wrapLogMessages": true,
-            "displayedFields": ["k8s.pod.name", "body"]
+            "displayedFields": ["k8s.pod.name", "_msg"]
           }
         }
       ],
       "schemaVersion": 38,
       "time": { "from": "now-1h", "to": "now" },
       "refresh": "10s",
-      "version": 1
+      "version": 2
     }
     `}}
