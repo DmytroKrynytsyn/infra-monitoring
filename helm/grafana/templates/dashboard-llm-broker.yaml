@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infra-monitoring-grafana-dashboard-llm-broker
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  dashboard-llm-broker.json: |
+    {{ `
+    {
+      "uid": "llm-broker",
+      "title": "app - llm-broker",
+      "editable": true,
+      "panels": [
+        {
+          "id": 1,
+          "title": "Request Rate (req/min)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (model) (rate(llm_broker_requests_total{namespace=\"llm-broker\"}[1m])) * 60",
+            "legendFormat": "{{model}}"
+          }]
+        },
+        {
+          "id": 2,
+          "title": "Average Latency (s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (model) (rate(llm_broker_request_duration_seconds_sum{namespace=\"llm-broker\"}[5m])) / sum by (model) (rate(llm_broker_request_duration_seconds_count{namespace=\"llm-broker\"}[5m]))",
+            "legendFormat": "{{model}}"
+          }]
+        },
+        {
+          "id": 3,
+          "title": "Errors (req/min)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (model) (rate(llm_broker_requests_total{namespace=\"llm-broker\", status=\"error\"}[1m])) * 60",
+            "legendFormat": "errors {{model}}"
+          }]
+        },
+        {
+          "id": 4,
+          "title": "App Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
+          "targets": [{
+            "expr": "{layer=\"app\", namespace=\"llm-broker\"}",
+            "refId": "A"
+          }],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true,
+            "displayedFields": ["k8s.pod.name", "_msg"]
+          }
+        }
+      ],
+      "schemaVersion": 38,
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
+      "version": 1
+    }
+    `}}

@@ -11,6 +11,7 @@ metadata:
     checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
     checksum/dashboards-llm: {{ include (print $.Template.BasePath "/dashboard-llm.yaml") . | sha256sum }}
     checksum/dashboards-telegram-bot: {{ include (print $.Template.BasePath "/dashboard-telegram-bot.yaml") . | sha256sum }}
+    checksum/dashboards-llm-broker: {{ include (print $.Template.BasePath "/dashboard-llm-broker.yaml") . | sha256sum }}
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 
 spec:
@@ -121,3 +122,9 @@ spec:
                   items:
                     - key: dashboard-telegram-bot.json
                       path: dashboard-telegram-bot.json
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-llm-broker
+                  items:
+                    - key: dashboard-llm-broker.json
+                      path: dashboard-llm-broker.json
