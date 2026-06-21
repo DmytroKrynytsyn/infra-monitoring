@@ -43,9 +43,8 @@ data:
           - pod
           - container
 
-      filelog/system:
-        include:
-          - /var/log/syslog
+      journald:
+        directory: /run/log/journal
         start_at: beginning
 
       k8s_events:
@@ -237,7 +236,7 @@ data:
           exporters: [prometheusremotewrite]
 
         logs/system:
-          receivers: [filelog/system]
+          receivers: [journald]
           processors: [resource/infra, resourcedetection, k8sattributes, batch]
           exporters: [otlphttp/victorialogs]
 
