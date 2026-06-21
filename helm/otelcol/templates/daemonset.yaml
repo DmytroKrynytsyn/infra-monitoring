@@ -74,9 +74,6 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: journal
-              mountPath: /run/log/journal
-              readOnly: true
             - name: etcmachineid
               mountPath: /etc/machine-id
               readOnly: true
@@ -96,9 +93,6 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        - name: journal
-          hostPath:
-            path: /run/log/journal
         - name: etcmachineid
           hostPath:
             path: /etc/machine-id
