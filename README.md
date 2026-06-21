@@ -11,8 +11,8 @@ Full-stack Kubernetes observability across three layers — OS, Kubernetes, and 
 | VictoriaMetrics | Metrics storage — 1-month retention |
 | VictoriaLogs | Log storage — 30-day retention |
 | Grafana | Unified UI — datasources and dashboards auto-provisioned |
-| Envoy Gateway | Gateway API ingress — HTTP + HTTPS with HTTP/2 |
-| cert-manager | Automatic TLS certificate provisioning |
+
+Gateway API ingress (Envoy Gateway) and TLS (cert-manager) are provisioned by the [homelab](https://github.com/DmytroKrynytsyn/homelab) Ansible repo, not here — this repo only ships `HTTPRoute`s that attach to that shared `homelab-gateway`.
 
 ## Telemetry layers
 
@@ -50,7 +50,7 @@ All panels use the `layer` label as the primary filter (`{layer="infra"}`, `{lay
 
 ## Routing
 
-All services exposed via Envoy Gateway using the Kubernetes Gateway API. TLS terminates at the Gateway level — cert-manager provisions a self-signed wildcard cert for `*.local` automatically.
+All services exposed via `HTTPRoute` resources attaching to the shared `homelab-gateway` (provisioned externally by the homelab Ansible repo's `k3s-gateway`/`k3s-certs` roles). TLS terminates at that Gateway using a cert-manager-issued wildcard cert for `*.local`.
 
 | Service | URL | Protocol |
 |---|---|---|
@@ -81,6 +81,4 @@ Then open `https://grafana.local`. Anonymous admin access is enabled by default.
 
 **VictoriaMetrics + VictoriaLogs over Prometheus + Loki** — single-binary each, lower memory footprint, native OpenTelemetry ingestion on VictoriaLogs.
 
-**Gateway API** — uses `HTTPRoute` resources instead of `Ingress`. TLS terminates at the shared `homelab-gateway` in `envoy-gateway-system`. Cross-namespace routing permitted via `ReferenceGrant` resources.
-
-**cert-manager** — self-signed `ClusterIssuer` provisions `homelab-tls` secret in `envoy-gateway-system`, referenced directly by the Gateway HTTPS listener.
+**Gateway API** — uses `HTTPRoute` resources instead of `Ingress`. TLS terminates at the shared `homelab-gateway` in `envoy-gateway-system` (Gateway, EnvoyProxy, cert-manager, and the `homelab-tls` cert all live in the homelab Ansible repo now, not here). Cross-namespace routing permitted via `ReferenceGrant` resources defined there.

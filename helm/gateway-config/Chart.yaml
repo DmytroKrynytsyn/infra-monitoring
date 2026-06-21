@@ -1,5 +1,0 @@
-apiVersion: v2
-name: gateway-config
-description: Envoy Gateway cluster-level configuration
-type: application
-version: 0.1.0

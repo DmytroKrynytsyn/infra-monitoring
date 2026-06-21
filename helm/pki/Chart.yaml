@@ -1,5 +1,0 @@
-apiVersion: v2
-name: pki
-description: Cluster PKI — self-signed issuer and homelab TLS certificate
-type: application
-version: 0.1.0
