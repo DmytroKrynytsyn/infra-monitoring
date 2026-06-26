@@ -8,10 +8,10 @@ metadata:
   annotations:
     checksum/dashboards-infra: {{ include (print $.Template.BasePath "/dashboard-infra.yaml") . | sha256sum }}
     checksum/dashboards-kuber: {{ include (print $.Template.BasePath "/dashboard-kuber.yaml") . | sha256sum }}
-    checksum/dashboards-app: {{ include (print $.Template.BasePath "/dashboard-app.yaml") . | sha256sum }}
-    checksum/dashboards-llm: {{ include (print $.Template.BasePath "/dashboard-llm.yaml") . | sha256sum }}
     checksum/dashboards-telegram-bot: {{ include (print $.Template.BasePath "/dashboard-telegram-bot.yaml") . | sha256sum }}
     checksum/dashboards-llm-broker: {{ include (print $.Template.BasePath "/dashboard-llm-broker.yaml") . | sha256sum }}
+    checksum/dashboards-llm-unit: {{ include (print $.Template.BasePath "/dashboard-llm-unit.yaml") . | sha256sum }}
+    checksum/dashboards-youtube: {{ include (print $.Template.BasePath "/dashboard-youtube.yaml") . | sha256sum }}
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 
 spec:
@@ -108,18 +108,6 @@ spec:
                       path: dashboard-kuber.json
 
               - configMap:
-                  name: infra-monitoring-grafana-dashboard-app
-                  items:
-                    - key: dashboard-app.json
-                      path: dashboard-app.json
-
-              - configMap:
-                  name: infra-monitoring-grafana-dashboard-llm
-                  items:
-                    - key: dashboard-llm.json
-                      path: dashboard-llm.json
-
-              - configMap:
                   name: infra-monitoring-grafana-dashboard-telegram-bot
                   items:
                     - key: dashboard-telegram-bot.json
@@ -130,3 +118,15 @@ spec:
                   items:
                     - key: dashboard-llm-broker.json
                       path: dashboard-llm-broker.json
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-llm-unit
+                  items:
+                    - key: dashboard-llm-unit.json
+                      path: dashboard-llm-unit.json
+
+              - configMap:
+                  name: infra-monitoring-grafana-dashboard-youtube
+                  items:
+                    - key: dashboard-youtube.json
+                      path: dashboard-youtube.json

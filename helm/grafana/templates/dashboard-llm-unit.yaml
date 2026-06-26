@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infra-monitoring-grafana-dashboard-llm-unit
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  dashboard-llm-unit.json: |
+    {{ `
+    {
+      "uid": "llm-unit",
+      "title": "app - llm-unit",
+      "editable": true,
+      "panels": [
+        {
+          "id": 1,
+          "title": "Request Rate (req/min)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (pool, model) (rate(llm_request_duration_seconds_count{namespace=\"llm-unit\"}[1m])) * 60",
+            "legendFormat": "{{pool}} / {{model}}"
+          }]
+        },
+        {
+          "id": 2,
+          "title": "Inference Latency p95/p99 (s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (pool, model, le) (rate(llm_request_duration_seconds_bucket{namespace=\"llm-unit\"}[5m])))",
+              "legendFormat": "p95 {{pool}} / {{model}}",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (pool, model, le) (rate(llm_request_duration_seconds_bucket{namespace=\"llm-unit\"}[5m])))",
+              "legendFormat": "p99 {{pool}} / {{model}}",
+              "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Errors (req/min)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (pool, model) (rate(llm_request_errors_total{namespace=\"llm-unit\"}[1m])) * 60",
+            "legendFormat": "errors {{pool}} / {{model}}"
+          }]
+        },
+        {
+          "id": 4,
+          "title": "App Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
+          "targets": [{
+            "expr": "{layer=\"app\", namespace=\"llm-unit\"}",
+            "refId": "A"
+          }],
+          "options": {
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessages": true,
+            "displayedFields": ["k8s.pod.name", "_msg"]
+          }
+        }
+      ],
+      "schemaVersion": 38,
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
+      "version": 1
+    }
+    `}}

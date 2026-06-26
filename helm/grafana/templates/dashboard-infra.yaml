@@ -10,7 +10,7 @@ data:
     {{- `
     {
       "uid": "infra",
-      "title": "cluster hosts",
+      "title": "hosts cluster",
       "editable": true,
       "panels": [
         {
@@ -108,6 +108,6 @@ data:
       "schemaVersion": 38,
       "time": { "from": "now-1h", "to": "now" },
       "refresh": "10s",
-      "version": 1
+      "version": 2
     }
     `}}
