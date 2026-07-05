@@ -56,9 +56,20 @@ data:
         },
         {
           "id": 4,
+          "title": "Tokens/min",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "VictoriaMetrics" },
+          "targets": [{
+            "expr": "sum by (model, source, type) (rate(llm_tokens_total{namespace=\"llm-unit\"}[1m])) * 60",
+            "legendFormat": "{{model}} / {{source}} / {{type}}"
+          }]
+        },
+        {
+          "id": 5,
           "title": "App Logs",
           "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
           "datasource": { "type": "victoriametrics-logs-datasource", "uid": "VictoriaLogs" },
           "targets": [{
             "expr": "{layer=\"app\", namespace=\"llm-unit\"}",
